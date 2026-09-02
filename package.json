@@ -5,9 +5,11 @@
   "dependencies": {
     "expo": "~57.0.19",
     "expo-modules-autolinking": "~57.0.0",
+    "expo-screen-orientation": "~57.0.2",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-edge-to-edge": "^1.8.1",
     "react-native-nitro-modules": "^0.37.1",
     "react-native-vision-camera": "^5.2.3"
   },
