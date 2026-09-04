@@ -28,12 +28,31 @@ export default function CameraView() {
   const [isFrozen, setIsFrozen] = useState(false);
   const [frozenUri, setFrozenUri] = useState(null);
 
+  // Store the zoom level just before freezing so we can restore it after unfreezing.
+  const zoomBeforeFreezeRef = useRef(null);
+
   useEffect(() => {
     // Ask the user for camera access when permission has not been granted yet.
     if (!hasPermission) {
       requestPermission();
     }
   }, [hasPermission, requestPermission]);
+
+  // Effect to restore zoom when the camera becomes active again after unfreezing.
+  useEffect(() => {
+    // Only run when isFrozen becomes false and we have a stored zoom value.
+    if (!isFrozen && zoomBeforeFreezeRef.current !== null) {
+      const zoomToRestore = zoomBeforeFreezeRef.current;
+      // Temporarily set zoom to null. This changes the prop and forces the Camera
+      // to reapply the zoom when we set it back shortly after.
+      setCameraZoom(null);
+      const timer = setTimeout(() => {
+        setCameraZoom(zoomToRestore);
+        zoomBeforeFreezeRef.current = null;
+      }, 100); // Small delay to let the camera finish re‑initialising.
+      return () => clearTimeout(timer);
+    }
+  }, [isFrozen]);
 
   // Do not render the camera until the app has permission to use it.
   if (!hasPermission) return null;
@@ -56,7 +75,7 @@ export default function CameraView() {
   // Capture the current frame when freezing, or clear it and resume the live preview when unfreezing.
   const toggleFreeze = async () => {
     if (isFrozen) {
-      // Delete the previously captured frame now that it is no longer being displayed.
+      // Unfreeze: resume the live preview.
       if (frozenUri) {
         try {
           new File(frozenUri).delete();
@@ -67,6 +86,8 @@ export default function CameraView() {
       setFrozenUri(null);
       setIsFrozen(false);
     } else {
+      // Freeze: store the current zoom level for later restoration.
+      zoomBeforeFreezeRef.current = cameraZoom;
       // takeSnapshot() writes the current frame to a temporary file and returns its path.
       const snapshot = await camera.current.takeSnapshot({ quality: 85 });
       setFrozenUri('file://' + snapshot.path);
