@@ -40,5 +40,5 @@ yarn-error.*
 /ios
 /android
 
-# generated when using AI for help
-.claude/
+# Personal notes
+Notes/
