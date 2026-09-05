@@ -13,11 +13,11 @@ No recording, no ads, no internet required!
 - **Zoom control** — A smooth, animated horizontal slider at the bottom of the screen lets you zoom from 1x up to 4x (or the device's maximum, whichever is lower). Uses gesture-based panning with 60fps Reanimated animations and throttled camera updates for performance.
 - **Edge-to-edge immersive mode** — System bars are fully hidden for a clean, distraction-free mirror experience using `react-native-edge-to-edge`.
 - **Freeze / unfreeze frame** — A button lets you freeze the current mirror frame (captured via `takeSnapshot`). While frozen, the camera pauses and the captured frame is shown; pressing the button again resumes the live preview and restores your previous zoom level.
+- **Brightness control (vertical side slider)** — A smooth, animated vertical slider allows you to control the brightness of the screen of the camera, without affecting the brightness setting from your device.
 
 ### Planned
 
 - Permission-denied guidance screen with option to open system settings (FR11)
-- Brightness control (vertical side slider)
 - Wide-angle / ultra-wide lens selection (FR05)
 - Keep screen always on (FR07)
 - Auto-hide controls with semi-transparent menu button (FR08)
@@ -81,6 +81,7 @@ MirrorVue/
 ├── app.json                        # Expo configuration
 ├── src/
 │   └── components/
+│       ├── BrightnessSlider.js     # Animated vertical brightness slider (gesture + reanimated)
 │       ├── CameraView.js           # Front camera display, permission flow, zoom state, freeze logic
 │       ├── ZoomSlider.js           # Animated horizontal zoom slider (gesture + reanimated)
 │       └── FreezeButton.js         # Freeze / unfreeze toggle button

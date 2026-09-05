@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-native-reanimated';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
-const TRACK_WIDTH = 260;
+const TRACK_WIDTH = 180;
 const THUMB_SIZE = 24;
 const MAX_TRANSLATE = TRACK_WIDTH - THUMB_SIZE;
 
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
     left: 0,
-    right: 0,
+    right: 50,
     alignItems: 'center',
     zIndex: 10,
   },

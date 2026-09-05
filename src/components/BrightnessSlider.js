@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-nativ
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import * as Brightness from 'expo-brightness';
 
-const TRACK_HEIGHT = 200;
+const TRACK_HEIGHT = 160;
 const THUMB_SIZE = 24;
 const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
 
@@ -80,8 +80,8 @@ export default function BrightnessSlider() {
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    right: 30,
-    top: '50%',
+    right: 40,
+    top: '72%',
     marginTop: -(TRACK_HEIGHT / 2),
     alignItems: 'center',
   },
@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
     backgroundColor: 'white',
+    left: -(THUMB_SIZE - 6) / 2,
     top: 0,
   },
 });
