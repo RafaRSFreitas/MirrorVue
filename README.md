@@ -1,6 +1,8 @@
 # Mirror Vue
 
-A lightweight digital mirror app for Android. Turn your device's front camera into a real-time mirror with smooth zoom controls — no recording, no ads, no internet required.
+A lightweight digital mirror app for Android. Turn your device's front camera into a real-time mirror with smooth zoom controls.
+
+No recording, no ads, no internet required!
 
 ## Features
 

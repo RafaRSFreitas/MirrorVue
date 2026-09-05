@@ -4,6 +4,7 @@ import { Camera, useCameraPermission, useCameraDevice } from 'react-native-visio
 import { File } from 'expo-file-system';
 import ZoomSlider from './ZoomSlider';
 import FreezeButton from './FreezeButton';
+import BrightnessSlider from './BrightnessSlider';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -122,6 +123,9 @@ export default function CameraView() {
 
       {/* Let the user freeze the current frame or return to the live preview. */}
       <FreezeButton isFrozen={isFrozen} onPress={toggleFreeze} />
+
+      {/* Let the user adjust the screen brightness while the app is open. */}
+      <BrightnessSlider />
     </View>
   );
 }
