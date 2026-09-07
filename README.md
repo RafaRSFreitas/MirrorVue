@@ -14,12 +14,12 @@ No recording, no ads, no internet required!
 - **Edge-to-edge immersive mode** — System bars are fully hidden for a clean, distraction-free mirror experience using `react-native-edge-to-edge`.
 - **Freeze / unfreeze frame** — A button lets you freeze the current mirror frame (captured via `takeSnapshot`). While frozen, the camera pauses and the captured frame is shown; pressing the button again resumes the live preview and restores your previous zoom level.
 - **Brightness control (vertical side slider)** — A smooth, animated vertical slider allows you to control the brightness of the screen of the camera, without affecting the brightness setting from your device.
+- **Keep screen always on (FR07)** — Overight the system settings, keeping the screen awake by default
 
 ### Planned
 
 - Permission-denied guidance screen with option to open system settings (FR11)
 - Wide-angle / ultra-wide lens selection (FR05)
-- Keep screen always on (FR07)
 - Auto-hide controls with semi-transparent menu button (FR08)
 - About screen (FR09)
 - Preference persistence — last used lens between sessions (FR10)

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, Text, Image, LogBox } from 'react-native';
+import { StyleSheet, View, Text, Image, LogBox, AppState } from 'react-native';
 import { Camera, useCameraPermission, useCameraDevice } from 'react-native-vision-camera';
 import { File } from 'expo-file-system';
 import ZoomSlider from './ZoomSlider';
@@ -29,8 +29,14 @@ export default function CameraView() {
   const [isFrozen, setIsFrozen] = useState(false);
   const [frozenUri, setFrozenUri] = useState(null);
 
-  // Store the zoom level just before freezing so we can restore it after unfreezing.
-  const zoomBeforeFreezeRef = useRef(null);
+  // Track whether the app is currently in the foreground, so the camera can pause in the background.
+  const [isAppActive, setIsAppActive] = useState(true);
+
+  // The camera should only run when it isn't frozen and the app is actually on screen.
+  const cameraActive = !isFrozen && isAppActive;
+
+  // Remember the most recently applied zoom level, so it can be restored after the camera pauses.
+  const lastZoomRef = useRef(null);
 
   useEffect(() => {
     // Ask the user for camera access when permission has not been granted yet.
@@ -39,21 +45,35 @@ export default function CameraView() {
     }
   }, [hasPermission, requestPermission]);
 
-  // Effect to restore zoom when the camera becomes active again after unfreezing.
+  // Update isAppActive whenever the app moves between the foreground and background.
   useEffect(() => {
-    // Only run when isFrozen becomes false and we have a stored zoom value.
-    if (!isFrozen && zoomBeforeFreezeRef.current !== null) {
-      const zoomToRestore = zoomBeforeFreezeRef.current;
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      setIsAppActive(nextAppState === 'active');
+    });
+    return () => subscription.remove();
+  }, []);
+
+  // Keep lastZoomRef up to date every time the zoom level actually changes.
+  useEffect(() => {
+    if (cameraZoom !== null) {
+      lastZoomRef.current = cameraZoom;
+    }
+  }, [cameraZoom]);
+
+  // Effect to restore zoom whenever the camera becomes active again — whether from
+  // unfreezing, or from the app returning to the foreground.
+  useEffect(() => {
+    if (cameraActive && lastZoomRef.current !== null) {
+      const zoomToRestore = lastZoomRef.current;
       // Temporarily set zoom to null. This changes the prop and forces the Camera
       // to reapply the zoom when we set it back shortly after.
       setCameraZoom(null);
       const timer = setTimeout(() => {
         setCameraZoom(zoomToRestore);
-        zoomBeforeFreezeRef.current = null;
       }, 100); // Small delay to let the camera finish re‑initialising.
       return () => clearTimeout(timer);
     }
-  }, [isFrozen]);
+  }, [cameraActive]);
 
   // Do not render the camera until the app has permission to use it.
   if (!hasPermission) return null;
@@ -87,8 +107,6 @@ export default function CameraView() {
       setFrozenUri(null);
       setIsFrozen(false);
     } else {
-      // Freeze: store the current zoom level for later restoration.
-      zoomBeforeFreezeRef.current = cameraZoom;
       // takeSnapshot() writes the current frame to a temporary file and returns its path.
       const snapshot = await camera.current.takeSnapshot({ quality: 85 });
       setFrozenUri('file://' + snapshot.path);
@@ -103,7 +121,7 @@ export default function CameraView() {
         ref={camera}
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={!isFrozen}
+        isActive={cameraActive}
         mirror={true} 
         // Leave zoom undefined at first so the camera can use its default zoom value.
         zoom={cameraZoom !== null ? cameraZoom : undefined} 
