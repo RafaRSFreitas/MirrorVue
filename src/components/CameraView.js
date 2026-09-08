@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, Text, Image, LogBox, AppState } from 'react-native';
-import { Camera, useCameraPermission, useCameraDevice } from 'react-native-vision-camera';
+import { Camera, useCameraPermission, useCameraDevices } from 'react-native-vision-camera';
 import { File } from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ZoomSlider from './ZoomSlider';
 import FreezeButton from './FreezeButton';
 import BrightnessSlider from './BrightnessSlider';
+import LensButton from './LensButton';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -16,11 +18,20 @@ export default function CameraView() {
   // Get the current permission status and the function used to request permission.
   const { hasPermission, requestPermission } = useCameraPermission();
 
-  // Select the phone's front-facing camera for the mirror view.
-  const device = useCameraDevice('front');
+  // Get every camera device on the phone, then keep only the front-facing ones.
+  const frontDevices = useCameraDevices().filter((d) => d.position === 'front');
+
+  // Track which of the available front lenses is currently selected.
+  const [selectedLensId, setSelectedLensId] = useState(null);
+
+  // Use the selected lens once one has been chosen, otherwise fall back to the first one found.
+  const device = frontDevices.find((d) => d.id === selectedLensId) ?? frontDevices[0];
   
   // Store the zoom value in React state so the Camera re-renders when it changes.
   const [cameraZoom, setCameraZoom] = useState(null);
+
+  // Changing this value tells ZoomSlider to return to its initial position
+  const [zoomResetKey, setZoomResetKey] = useState(0);
 
   // A reference to the Camera component, needed to call takeSnapshot() on it directly.
   const camera = useRef(null);
@@ -44,6 +55,16 @@ export default function CameraView() {
       requestPermission();
     }
   }, [hasPermission, requestPermission]);
+
+  // Load the previously selected lens, if any, once the available lenses are known.
+  useEffect(() => {
+    if (frontDevices.length > 0) {
+      AsyncStorage.getItem('selectedLensId').then((savedId) => {
+        const match = frontDevices.find((d) => d.id === savedId);
+        setSelectedLensId(match ? match.id : frontDevices[0].id);
+      });
+    }
+  }, [frontDevices.length]);
 
   // Update isAppActive whenever the app moves between the foreground and background.
   useEffect(() => {
@@ -114,6 +135,26 @@ export default function CameraView() {
     }
   };
 
+  // Cycle to the next available front lens. Zoom resets since each lens has its own range.
+  const switchLens = () => {
+    const currentIndex = frontDevices.findIndex((d) => d.id === device.id);
+    const nextDevice = frontDevices[(currentIndex + 1) % frontDevices.length];
+
+    // Forget the previous lens's zoom.
+    lastZoomRef.current = null;
+
+    // Select the new lens.
+    setSelectedLensId(nextDevice.id);
+
+    // Start the new lens at its minimum supported zoom.
+    setCameraZoom(nextDevice.minZoom ?? 1);
+
+    // Reset the visual zoom slider to its starting position.
+    setZoomResetKey((currentKey) => currentKey + 1);
+
+    AsyncStorage.setItem('selectedLensId', nextDevice.id);
+  };
+
   return (
     <View style={styles.container}>
       {/* Display the front camera and flip it horizontally to create a mirror effect. */}
@@ -137,6 +178,7 @@ export default function CameraView() {
         minZoom={minZoom} 
         maxZoom={maxZoom} 
         onZoomChange={(newZoom) => setCameraZoom(newZoom)}
+        resetKey={zoomResetKey}
       />
 
       {/* Let the user freeze the current frame or return to the live preview. */}
@@ -144,6 +186,11 @@ export default function CameraView() {
 
       {/* Let the user adjust the screen brightness while the app is open. */}
       <BrightnessSlider />
+
+      {/* Only show the lens toggle when the phone actually has more than one front camera. */}
+      {frontDevices.length > 1 && (
+        <LensButton onPress={switchLens} />
+      )}
     </View>
   );
 }

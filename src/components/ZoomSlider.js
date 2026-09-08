@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-native-reanimated';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
-const TRACK_WIDTH = 180;
+const TRACK_WIDTH = 160;
 const THUMB_SIZE = 24;
 const MAX_TRANSLATE = TRACK_WIDTH - THUMB_SIZE;
 
-export default function ZoomSlider({ minZoom, maxZoom, onZoomChange }) {
+export default function ZoomSlider({ minZoom, maxZoom, onZoomChange, resetKey }) {
   // This shared value stores the thumb's horizontal position on the slider.
   const translateX = useSharedValue(0);
 
@@ -16,6 +16,14 @@ export default function ZoomSlider({ minZoom, maxZoom, onZoomChange }) {
 
   // This helps avoid sending zoom updates to the camera too frequently.
   const lastUpdate = useSharedValue(0);
+
+  // Reset the slider when the selcted camera lens changes.
+  useEffect(() => {
+    translateX.value = 0;
+    contextX.value = 0;
+    lastUpdate.value = 0;
+
+  }, [resetKey]);
 
   // The zoom range is the difference between the smallest and largest zoom values.
   const range = maxZoom - minZoom;
@@ -79,9 +87,8 @@ export default function ZoomSlider({ minZoom, maxZoom, onZoomChange }) {
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    bottom: 50,
-    left: 0,
-    right: 50,
+    bottom: 45,
+    right: 130,
     alignItems: 'center',
     zIndex: 10,
   },

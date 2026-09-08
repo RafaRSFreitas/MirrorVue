@@ -80,8 +80,8 @@ export default function BrightnessSlider() {
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    right: 40,
-    top: '72%',
+    right: 45,
+    bottom: 130,
     marginTop: -(TRACK_HEIGHT / 2),
     alignItems: 'center',
   },

@@ -1,12 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-export default function FreezeButton({ isFrozen, onPress }) {
+export default function LensButton({ onPress }) {
   return (
-    // Tapping this button runs the toggleFreeze function passed down from CameraView.
+    // Tapping this button runs the switchLens function passed down from CameraView.
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      {/* Show a different symbol depending on whether the camera is currently frozen. */}
-      <Text style={styles.label}>{isFrozen ? '▶' : '❄'}</Text>
+      <Text style={styles.label}>⇄</Text>
     </TouchableOpacity>
   );
 }
@@ -14,8 +13,8 @@ export default function FreezeButton({ isFrozen, onPress }) {
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    bottom: 40,
-    right: 40,
+    top:  40,
+    left: 80,
     width: 50,
     height: 50,
     borderRadius: 25,
