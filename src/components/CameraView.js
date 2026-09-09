@@ -7,6 +7,7 @@ import ZoomSlider from './ZoomSlider';
 import FreezeButton from './FreezeButton';
 import BrightnessSlider from './BrightnessSlider';
 import LensButton from './LensButton';
+import Menu from './Menu';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -91,7 +92,7 @@ export default function CameraView() {
       setCameraZoom(null);
       const timer = setTimeout(() => {
         setCameraZoom(zoomToRestore);
-      }, 100); // Small delay to let the camera finish re‑initialising.
+      }, 100); // Small delay to let the camera finish re-initialising.
       return () => clearTimeout(timer);
     }
   }, [cameraActive]);
@@ -172,6 +173,9 @@ export default function CameraView() {
       {isFrozen && (
         <Image source={{ uri: frozenUri }} style={StyleSheet.absoluteFill} />
       )}
+
+      {/* Display the top-left menu and its navigation options. */}
+      <Menu />
 
       {/* Update cameraZoom whenever the user moves the zoom slider. */}
       <ZoomSlider 
