@@ -61,9 +61,16 @@ export default function Menu() {
         <Text style={styles.menuIcon}>☰</Text>
       </TouchableOpacity>
 
+      {/* When the menu is open, a transparent full-screen layer makes any tap
+          outside the dropdown close it. It sits below the button and dropdown
+          so those remain interactive. */}
+      {isMenuOpen && (
+        <Pressable style={styles.menuOverlay} onPress={toggleMenu} />
+      )}
+
       {/* Show the three menu items when the hamburger button has been opened. */}
       {isMenuOpen && (
-        <View style={styles.menuDropdown}>
+        <View style={styles.menuDropdown} onStartShouldSetResponder={() => true}>
           {/* Open the centered Settings panel. */}
           <TouchableOpacity style={styles.menuItem} onPress={openSettings}>
             <Text style={styles.menuItemText}>Settings</Text>
@@ -135,11 +142,10 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(82, 82, 82, 0.37)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
-    elevation: 10,
   },
 
   // Style the hamburger icon so it is easy to see against the camera preview.
@@ -148,17 +154,27 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
 
+  // A transparent full-screen layer that catches taps outside the dropdown.
+  // It renders below the button and dropdown (zIndex 5) so they stay usable.
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 5,
+  },
+
   // Display the menu as a small semi-transparent dropdown beneath the hamburger button.
   menuDropdown: {
     position: 'absolute',
     top: 95,
     left: 20,
     width: 190,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(82, 82, 82, 0.37)',
+    borderRadius: 18,
     overflow: 'hidden',
     zIndex: 10,
-    elevation: 10,
   },
 
   // Give each menu option enough vertical space to be comfortably selectable.
@@ -171,7 +187,7 @@ const styles = StyleSheet.create({
   // Use a high-contrast text color for the menu options.
   menuItemText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
   },
 
   // Cover the entire preview and center the Settings card in both directions.
