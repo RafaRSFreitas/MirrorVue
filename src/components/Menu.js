@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Pressable, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Pressable } from 'react-native';
 import About from './About';
 import DonationPanel from './DonationPanel';
+import Settings from './Settings';
 
 export default function Menu() {
   // Track whether the top-left menu dropdown is currently open.
@@ -70,8 +71,11 @@ export default function Menu() {
 
       {/* Show the three menu items when the hamburger button has been opened. */}
       {isMenuOpen && (
-        <View style={styles.menuDropdown} onStartShouldSetResponder={() => true}>
-          {/* Open the centered Settings panel. */}
+        <View
+          style={styles.menuDropdown}
+          onStartShouldSetResponder={() => true}
+        >
+          {/* Open the Settings panel. */}
           <TouchableOpacity style={styles.menuItem} onPress={openSettings}>
             <Text style={styles.menuItemText}>Settings</Text>
           </TouchableOpacity>
@@ -91,39 +95,8 @@ export default function Menu() {
       {/* Display the About information in its own centered overlay component. */}
       <About visible={isAboutOpen} onClose={closeAbout} />
 
-      {/* Display the Settings panel as a centered semi-transparent overlay. */}
-      <Modal
-        visible={isSettingsOpen}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        navigationBarTranslucent
-        onRequestClose={closeSettings}
-      >
-        <Pressable style={styles.settingsOverlay} onPress={closeSettings}>
-          <View
-            style={styles.settingsPanel}
-            onStartShouldSetResponder={() => true}
-          >
-            {/* Close the Settings panel and return to the mirror preview. */}
-            <TouchableOpacity
-              style={styles.settingsCloseButton}
-              onPress={closeSettings}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.aboutCloseText}>✕</Text>
-            </TouchableOpacity>
-
-            {/* Display the Settings heading inside the centered panel. */}
-            <Text style={styles.aboutTitle}>Settings</Text>
-
-            {/* Settings controls will be added in the next implementation phase. */}
-            <Text style={styles.aboutDescription}>
-              Settings options are coming soon.
-            </Text>
-          </View>
-        </Pressable>
-      </Modal>
+      {/* Display the Settings panel and its functional preferences. */}
+      <Settings visible={isSettingsOpen} onClose={closeSettings} />
 
       {/* Display the DonationPanel when the user chooses Buy me a coffee. */}
       {isDonationOpen && (
@@ -189,37 +162,4 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
   },
-
-  // Cover the entire preview and center the Settings card in both directions.
-  settingsOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-
-  // Keep the Settings content inside a centered readable card.
-  settingsPanel: {
-    width: '90%',
-    maxWidth: 400,
-    backgroundColor: 'rgba(0,0,0,0.88)',
-    borderRadius: 12,
-    padding: 24,
-    position: 'relative',
-  },
-
-  // Place the Settings close button in the upper-right corner of the panel.
-  settingsCloseButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 30,
-    elevation: 30,
-  },
-
 });

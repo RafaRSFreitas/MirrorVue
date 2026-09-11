@@ -1,5 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Pressable, Modal } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Pressable,
+  Modal,
+  ScrollView,
+} from 'react-native';
 
 export default function About({ visible, onClose }) {
   return (
@@ -25,8 +33,13 @@ export default function About({ visible, onClose }) {
             <Text style={styles.closeText}>✕</Text>
           </TouchableOpacity>
 
-          {/* Display the application name required by the About screen. */}
-          <Text style={styles.title}>MirrorVue</Text>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={true}
+          >
+            {/* Display the application name required by the About screen. */}
+            <Text style={styles.title}>MirrorVue</Text>
 
           {/* Display the current application version from package.json. */}
           <Text style={styles.text}>Version 0.6.0</Text>
@@ -41,10 +54,11 @@ export default function About({ visible, onClose }) {
           </Text>
 
           {/* Explain the privacy behavior required by the product requirements. */}
-          <Text style={styles.description}>
-            Privacy: the camera preview is displayed locally. MirrorVue
-            does not upload or transmit your image or video.
-          </Text>
+            <Text style={styles.description}>
+              Privacy: the camera preview is displayed locally. MirrorVue
+              does not upload or transmit your image or video.
+            </Text>
+          </ScrollView>
         </View>
       </Pressable>
     </Modal>
@@ -58,6 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
 
   // Keep the About content inside a centered readable card.
@@ -68,6 +83,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 24,
     position: 'relative',
+    maxHeight: '90%',
+    flexShrink: 1,
+  },
+
+  // Let About content shrink to the available height and scroll when needed.
+  scrollView: {
+    flexShrink: 1,
+  },
+
+  // Keep the final About text clear of the panel edge when the body is scrolled.
+  scrollContent: {
+    paddingBottom: 8,
   },
 
   // Place the close button in the upper-right corner of the About panel.

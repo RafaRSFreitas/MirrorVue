@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Pressable, Modal } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Pressable,
+  Modal,
+  ScrollView,
+} from 'react-native';
 import { useIAP, ErrorCode } from 'expo-iap';
 
 // These are the four fixed Google Play product IDs defined for MirrorVue.
@@ -127,12 +136,20 @@ export default function DonationPanel({ onClose }) {
           onStartShouldSetResponder={() => true}
         >
         {/* Close the DonationPanel and return to the mirror preview. */}
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={onClose}
+            activeOpacity={0.7}>
           <Text style={styles.closeText}> ✕ </Text>
         </TouchableOpacity>
 
-        {/* Explain that the user is voluntarily supporting the application. */}
-        <Text style={styles.title}>Buy me a coffee</Text>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+        >
+          {/* Explain that the user is voluntarily supporting the application. */}
+          <Text style={styles.title}>Buy me a coffee</Text>
 
         <Text style={styles.description}>
           MirrorVue is free, with no ads, and fully functional for everyone!          
@@ -181,9 +198,10 @@ export default function DonationPanel({ onClose }) {
         )}
 
         {/* Display billing, cancellation, connectivity, and purchase-status information. */}
-        {!!statusMessage && (
-          <Text style={styles.statusText}>{statusMessage}</Text>
-        )}
+          {!!statusMessage && (
+            <Text style={styles.statusText}>{statusMessage}</Text>
+          )}
+        </ScrollView>
         </View>
       </Pressable>
     </Modal>
@@ -207,17 +225,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.88)',
     borderRadius: 12,
     padding: 24,
+    maxHeight: '90%',
+    flexShrink: 1,
+  },
+
+  // Let donation content shrink to the available height and scroll when needed.
+  scrollView: {
+    flexShrink: 1,
+  },
+
+  // Keep the final billing status clear of the panel edge when the body is scrolled.
+  scrollContent: {
+    paddingBottom: 8,
   },
 
   // Place the close button in the upper-right corner of the panel.
   closeButton: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 40,
-    height: 40,
+    top: 8,
+    right: 8,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 30,
+    elevation: 30,
   },
 
   // Use a simple close symbol rather than adding another icon dependency.

@@ -1,27 +1,49 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, AppState } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
-import * as ScreenOrientation from 'expo-screen-orientation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  activateKeepAwakeAsync,
+  deactivateKeepAwake,
+} from 'expo-keep-awake';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import CameraView from './src/components/CameraView';
 
+// Store the key used by Settings.js for the Keep screen awake preference.
+const KEEP_SCREEN_AWAKE_KEY = 'keepScreenAwake';
+
 export default function App() {
-  // Run this setup when the app starts so the interface stays in portrait mode.
-  useEffect(() => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-  }, []);
+  // Apply the saved Keep screen awake preference when the app is active.
+  const applyKeepAwakeSetting = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(KEEP_SCREEN_AWAKE_KEY);
 
-  // Keep the screen on while the app is in the foreground, and let it sleep normally otherwise.
-  useEffect(() => {
-    // The app opens in the foreground, so keep the screen on right away.
-    activateKeepAwakeAsync();
+      // Keep the screen awake by default unless the user explicitly disabled it.
+      const keepScreenAwake = savedValue === null || savedValue === 'true';
 
-    // Toggle the keep-awake lock whenever the app moves between the foreground and background.
+      if (keepScreenAwake) {
+        await activateKeepAwakeAsync();
+      } else {
+        await deactivateKeepAwake();
+      }
+    } catch (error) {
+      // Use the required default behavior if the saved preference cannot be read.
+      await activateKeepAwakeAsync();
+    }
+  };
+
+  // Keep the screen awake according to the user's Settings preference while active,
+  // and always release it when the app moves into the background.
+  useEffect(() => {
+    // Apply the saved preference when the app first starts.
+    applyKeepAwakeSetting();
+
+    // Reapply the saved preference whenever the app returns to the foreground.
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') {
-        activateKeepAwakeAsync();
+        applyKeepAwakeSetting();
       } else {
+        // Always allow the screen to sleep normally while the app is backgrounded.
         deactivateKeepAwake();
       }
     });
@@ -31,11 +53,12 @@ export default function App() {
       deactivateKeepAwake();
     };
   }, []);
-  
+
   return (
     /* This wrapper allows gesture-based components, such as the zoom slider, to work. */
     <GestureHandlerRootView style={styles.container}>
       <SystemBars hidden={{ statusBar: true, navigationBar: true }} />
+
       {/* The inner view fills the available screen space and contains the camera. */}
       <View style={styles.container}>
         <CameraView />
@@ -50,3 +73,4 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
