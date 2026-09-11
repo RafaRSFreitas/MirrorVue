@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Modal,
   Switch,
-  TextInput,
   AppState,
   ScrollView,
 } from 'react-native';
@@ -21,16 +20,12 @@ import {
 const SETTINGS_KEYS = {
   allowLandscape: 'allowLandscapeMode',
   keepScreenAwake: 'keepScreenAwake',
-  autoHideControls: 'autoHideControls',
-  autoHideTimeout: 'autoHideTimeout',
 };
 
 // These are the default values.
 const DEFAULT_SETTINGS = {
   allowLandscape: false,
   keepScreenAwake: true,
-  autoHideControls: false,
-  autoHideTimeout: '10',
 };
 
 export default function Settings({ visible, onClose }) {
@@ -42,16 +37,6 @@ export default function Settings({ visible, onClose }) {
   // Track whether the screen should remain awake while the app is in the foreground.
   const [keepScreenAwake, setKeepScreenAwake] = useState(
     DEFAULT_SETTINGS.keepScreenAwake
-  );
-
-  // Track whether automatic control hiding is enabled.
-  const [autoHideControls, setAutoHideControls] = useState(
-    DEFAULT_SETTINGS.autoHideControls
-  );
-
-  // Store the auto-hide timeout as text so the user can edit the value directly.
-  const [autoHideTimeout, setAutoHideTimeout] = useState(
-    DEFAULT_SETTINGS.autoHideTimeout
   );
 
   // Load all saved Settings once the component is mounted.
@@ -66,14 +51,6 @@ export default function Settings({ visible, onClose }) {
           SETTINGS_KEYS.keepScreenAwake
         );
 
-        const savedAutoHideControls = await AsyncStorage.getItem(
-          SETTINGS_KEYS.autoHideControls
-        );
-
-        const savedAutoHideTimeout = await AsyncStorage.getItem(
-          SETTINGS_KEYS.autoHideTimeout
-        );
-
         setAllowLandscape(
           savedAllowLandscape === null
             ? DEFAULT_SETTINGS.allowLandscape
@@ -84,16 +61,6 @@ export default function Settings({ visible, onClose }) {
           savedKeepScreenAwake === null
             ? DEFAULT_SETTINGS.keepScreenAwake
             : savedKeepScreenAwake === 'true'
-        );
-
-        setAutoHideControls(
-          savedAutoHideControls === null
-            ? DEFAULT_SETTINGS.autoHideControls
-            : savedAutoHideControls === 'true'
-        );
-
-        setAutoHideTimeout(
-          savedAutoHideTimeout ?? DEFAULT_SETTINGS.autoHideTimeout
         );
       } catch (error) {
         // Keep the default Settings if stored values cannot be loaded.
@@ -172,42 +139,6 @@ export default function Settings({ visible, onClose }) {
     }
   };
 
-  // Save whether automatic control hiding is enabled.
-  const toggleAutoHideControls = async (value) => {
-    setAutoHideControls(value);
-
-    await AsyncStorage.setItem(
-      SETTINGS_KEYS.autoHideControls,
-      String(value)
-    );
-  };
-
-  // Save the auto-hide timeout after making sure it stays between 5 and 99 seconds.
-  const saveAutoHideTimeout = async () => {
-    const numericValue = Number.parseInt(autoHideTimeout, 10);
-
-    // Use the default timeout when the entered value is not a valid number.
-    if (Number.isNaN(numericValue)) {
-      setAutoHideTimeout(DEFAULT_SETTINGS.autoHideTimeout);
-      await AsyncStorage.setItem(
-        SETTINGS_KEYS.autoHideTimeout,
-        DEFAULT_SETTINGS.autoHideTimeout
-      );
-      return;
-    }
-
-    // Limit the value to the required 5-to-99 second range.
-    const clampedValue = Math.min(99, Math.max(5, numericValue));
-    const timeoutValue = String(clampedValue);
-
-    setAutoHideTimeout(timeoutValue);
-
-    await AsyncStorage.setItem(
-      SETTINGS_KEYS.autoHideTimeout,
-      timeoutValue
-    );
-  };
-
   return (
     <Modal
       visible={visible}
@@ -276,65 +207,7 @@ export default function Settings({ visible, onClose }) {
               />
             </View>
 
-            {/* Enable the automatic control-hiding preference. */}
-            <View style={styles.settingRow}>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Auto-hide controls</Text>
-                <Text style={styles.settingDescription}>
-                  Hide the mirror controls after a period of inactivity.
-                </Text>
-              </View>
-
-              <Switch
-                value={autoHideControls}
-                onValueChange={toggleAutoHideControls}
-              />
-            </View>
-
-            {/* Only show the timeout control when auto-hide has been enabled. */}
-            {autoHideControls && (
-              <View style={styles.timeoutContainer}>
-                <Text style={styles.timeoutLabel}>
-                  Auto-hide timeout (5–99 seconds)
-                </Text>
-
-                <TextInput
-                  value={autoHideTimeout}
-                  onChangeText={(value) => {
-                    // Keep only numeric characters in the timeout input.
-                    setAutoHideTimeout(value.replace(/[^0-9]/g, ''));
-                  }}
-                  onBlur={saveAutoHideTimeout}
-                  onSubmitEditing={saveAutoHideTimeout}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  style={styles.timeoutInput}
-                />
-
-                <Text style={styles.timeoutHint}>
-                  To be implemented soon
-                </Text>
-              </View>
-            )}
-
-            {/* Show future settings as disabled placeholders. */}
-            <Text style={styles.sectionTitle}>Other settings</Text>
-
-            <View style={styles.placeholderRow}>
-              <Text style={styles.settingTitle}>
-                Keep specific controls always visible
-              </Text>
-
-              <Switch
-                value={false}
-                disabled={true}
-              />
-            </View>
-
-            <Text style={styles.placeholderText}>
-              Additional control-visibility options are reserved for future
-              versions.
-            </Text>
+            
           </ScrollView>
         </View>
       </View>
@@ -439,39 +312,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginTop: 4,
-  },
-
-  // Keep the timeout setting visually grouped below Auto-hide controls.
-  timeoutContainer: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.12)',
-  },
-
-  // Display the timeout label above the input.
-  timeoutLabel: {
-    color: 'white',
-    fontSize: 15,
-    marginBottom: 8,
-  },
-
-  // Give the timeout input a clear editable appearance.
-  timeoutInput: {
-    width: 90,
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    color: 'white',
-    fontSize: 18,
-    paddingHorizontal: 12,
-  },
-
-  // Explain the current scope of the timeout setting.
-  timeoutHint: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 8,
   },
 
   // Separate future placeholder settings from functional settings.

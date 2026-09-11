@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-nativ
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import * as Brightness from 'expo-brightness';
 
-const TRACK_HEIGHT = 160;
+const TRACK_HEIGHT = 140;
 const THUMB_SIZE = 24;
 const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
 
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
     right: 45,
-    bottom: 130,
+    bottom: 110,
     marginTop: -(TRACK_HEIGHT / 2),
     alignItems: 'center',
   },

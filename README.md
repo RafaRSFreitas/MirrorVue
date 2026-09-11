@@ -23,8 +23,8 @@ The core mirror works without internet access. Internet access is only needed wh
 
 The revised product is intended to remain simple, local, and comfortable for one-handed use. The next controls and behaviors are planned around that goal:
 
-- Functional Settings controls for landscape rotation, keep-screen-awake, and configurable auto-hide behavior.
-- Automatic control hiding after inactivity, with a permanent top-right eye button to show or hide the controls.
+- Functional Settings controls for landscape rotation and keep-screen-awake.
+- A permanent top-right eye button to show or hide the controls manually.
 - A permission-denied screen with retry and system-settings actions.
 - Camera-in-use error handling with a retry action.
 - A static in-memory freeze implementation so freezing never creates a file on disk.
