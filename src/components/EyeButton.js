@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { FontAwesome } from '@react-native-vector-icons/fontawesome/static';
 
 export default function EyeButton({
 controlsVisible,
@@ -30,8 +31,12 @@ This layer stays below the other controls so they remain interactive. */} <Press
     onPress={toggleVisibility}
     activeOpacity={0.7}
   >
-    {/* Use a simple eye symbol without adding another icon dependency. */}
-    <Text style={styles.icon}>👁️</Text>
+    {/* Show eye-slash while the controls are visible, and eye while they are hidden. */}
+    <FontAwesome
+      name={controlsVisible ? 'eye-slash' : 'eye'}
+      size={23}
+      color="white"
+    />
   </TouchableOpacity>
 </>
 
@@ -58,10 +63,5 @@ justifyContent: 'center',
 alignItems: 'center',
 zIndex: 20,
 elevation: 20,
-},
-
-// Make the eye large enough to be easily recognised.
-icon: {
-fontSize: 22,
 },
 });
