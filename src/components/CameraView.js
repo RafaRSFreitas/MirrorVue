@@ -40,6 +40,8 @@ export default function CameraView() {
   // Track whether the preview is currently frozen, and the captured frame to show while it is.
   const [isFrozen, setIsFrozen] = useState(false);
   const [frozenUri, setFrozenUri] = useState(null);
+  const isFrozenRef = useRef(false);
+  const frozenUriRef = useRef(null);
 
   // Track whether the app is currently in the foreground, so the camera can pause in the background.
   const [isAppActive, setIsAppActive] = useState(true);
@@ -70,6 +72,19 @@ export default function CameraView() {
   // Update isAppActive whenever the app moves between the foreground and background.
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active' && isFrozenRef.current) {
+        if (frozenUriRef.current) {
+          try {
+            new File(frozenUriRef.current).delete();
+          } catch (error) {
+            // The file may already be gone, which is fine — there is nothing left to clean up.
+          }
+        }
+        frozenUriRef.current = null;
+        isFrozenRef.current = false;
+        setFrozenUri(null);
+        setIsFrozen(false);
+      }
       setIsAppActive(nextAppState === 'active');
     });
     return () => subscription.remove();
@@ -119,19 +134,24 @@ export default function CameraView() {
   const toggleFreeze = async () => {
     if (isFrozen) {
       // Unfreeze: resume the live preview.
-      if (frozenUri) {
+      if (frozenUriRef.current) {
         try {
-          new File(frozenUri).delete();
+          new File(frozenUriRef.current).delete();
         } catch (error) {
           // The file may already be gone, which is fine — there is nothing left to clean up.
         }
       }
+      frozenUriRef.current = null;
+      isFrozenRef.current = false;
       setFrozenUri(null);
       setIsFrozen(false);
     } else {
       // takeSnapshot() writes the current frame to a temporary file and returns its path.
       const snapshot = await camera.current.takeSnapshot({ quality: 85 });
-      setFrozenUri('file://' + snapshot.path);
+      const nextFrozenUri = 'file://' + snapshot.path;
+      frozenUriRef.current = nextFrozenUri;
+      isFrozenRef.current = true;
+      setFrozenUri(nextFrozenUri);
       setIsFrozen(true);
     }
   };
