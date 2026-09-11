@@ -26,7 +26,7 @@ const SETTINGS_KEYS = {
   autoHideTimeout: 'autoHideTimeout',
 };
 
-// These are the default values required by the product requirements.
+// These are the default values.
 const DEFAULT_SETTINGS = {
   allowLandscape: false,
   keepScreenAwake: true,
@@ -218,10 +218,16 @@ export default function Settings({ visible, onClose }) {
       navigationBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <View
+        style={styles.overlay}
+        onTouchEnd={(event) => {
+          if (event.target === event.currentTarget) {
+            onClose();
+          }
+        }}
+      >
         <View
           style={styles.panel}
-          onStartShouldSetResponder={() => true}
         >
           {/* Close the Settings panel and return to the mirror preview. */}
           <TouchableOpacity
@@ -332,7 +338,7 @@ export default function Settings({ visible, onClose }) {
             </Text>
           </ScrollView>
         </View>
-      </Pressable>
+      </View>
     </Modal>
   );
 }
@@ -347,6 +353,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+  // Receive dismissal taps only when the touch target is the overlay itself.
+  // (The panel is a sibling above it, so card touches never reach it.)
+
   // Keep the Settings content in a large readable panel over the mirror.
   panel: {
     width: '100%',
@@ -357,6 +366,8 @@ const styles = StyleSheet.create({
     padding: 24,
     position: 'relative',
     flexShrink: 1,
+    zIndex: 1,
+    elevation: 1,
   },
 
   // Let the settings body shrink to the available height and scroll when needed.

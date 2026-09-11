@@ -19,10 +19,16 @@ export default function About({ visible, onClose }) {
       navigationBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <View
+        style={styles.overlay}
+        onTouchEnd={(event) => {
+          if (event.target === event.currentTarget) {
+            onClose();
+          }
+        }}
+      >
         <View
           style={styles.panel}
-          onStartShouldSetResponder={() => true}
         >
           {/* Close the About panel and return to the mirror preview. */}
           <TouchableOpacity
@@ -60,7 +66,7 @@ export default function About({ visible, onClose }) {
             </Text>
           </ScrollView>
         </View>
-      </Pressable>
+      </View>
     </Modal>
   );
 }
@@ -75,6 +81,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+  // Receive dismissal taps only when the touch target is the overlay itself.
+  // (The panel is a sibling above it, so card touches never reach it.)
+
   // Keep the About content inside a centered readable card.
   panel: {
     width: '90%',
@@ -85,6 +94,8 @@ const styles = StyleSheet.create({
     position: 'relative',
     maxHeight: '90%',
     flexShrink: 1,
+    zIndex: 1,
+    elevation: 1,
   },
 
   // Let About content shrink to the available height and scroll when needed.
