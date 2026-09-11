@@ -8,30 +8,31 @@ The core mirror works without internet access. Internet access is only needed wh
 
 ## Current Features
 
-- **Fullscreen mirror preview** - The front camera is horizontally mirrored and displayed edge to edge. The app currently locks the interface to portrait.
-- **Camera permission request** - Camera access is requested on first use.
+- **Fullscreen mirror preview** - The front camera is horizontally mirrored and displayed edge to edge. The interface defaults to portrait, but landscape rotation can be enabled from Settings.
+- **Camera permission request** - Camera access is requested on first use; a permission-denied screen with retry and system-settings actions is shown if access is denied.
 - **Zoom control** - An animated horizontal slider maps to the selected camera's zoom range, capped at 4x or the device maximum, whichever is lower. Updates are throttled for smooth interaction.
 - **Brightness control** - An animated vertical slider changes the device screen brightness while the app is in use.
 - **Freeze and unfreeze** - Freezing pauses the live camera and displays a captured frame. Unfreezing removes the temporary snapshot file and resumes the preview, restoring the previous zoom when appropriate.
-- **Front lens selection** - When more than one front-facing camera is available, including virtual camera, a lens button appears in the top-left area. It cycles through the available front lenses, remembers the selected lens between sessions, and resets the zoom slider for the new lens.
-- **Top-left menu** - A hamburger menu opens a semi-transparent menu with Settings, About, and Buy me a coffee.
-- **About screen** - About opens as a centered overlay with the app version, developer information, description, and privacy notice. Tapping outside the card or the close button dismisses it.
-- **Donation panel** - Buy me a coffee opens an in-app donation panel backed by Google Play Billing. It loads four fixed consumable products (`donation_1` through `donation_4`) and displays the localized product names and prices returned by Google Play. Completed purchases are acknowledged and consumed so donations can be repeated.
-- **Keep screen awake** - The screen stays awake while the app is in the foreground and can sleep normally after the app is backgrounded.
-- **App lifecycle handling** - The camera pauses in the background and resumes in the foreground.
+- **Front lens selection** - When more than one front-facing camera is available, a lens button appears in the top-left area. It cycles through the available front lenses, remembers the selected lens between sessions, and resets the zoom slider for the new lens.
+- **Top-left menu** - A hamburger menu opens a semi-transparent dropdown with Settings, About, and Buy me a coffee.
+- **Settings screen** - A centered modal overlay with functional toggles: "Allow landscape mode" (enables portrait/landscape rotation when the device is turned, without restarting the camera), "Keep screen awake" (on by default, disables system screen timeout), and "Auto-hide controls" (with a 5–99 second timeout input). 
+- **About screen** - Opens as a centered overlay with the app version, developer information, description, and privacy notice. Tapping outside the card or the close button dismisses it.
+- **Keep screen awake** - The screen stays awake while the app is in the foreground and can sleep normally after the app is backgrounded (configurable via Settings).
+- **Landscape rotation** - When enabled in Settings, the interface and controls rotate between portrait and landscape when the device is turned; the live camera feed continues uninterrupted without reinitializing the camera.
+- **App lifecycle handling** - The camera pauses in the background and resumes in the foreground; orientation and keep-awake policies are reapplied on return to the foreground.
 
 ## Product Direction
 
 The revised product is intended to remain simple, local, and comfortable for one-handed use. The next controls and behaviors are planned around that goal:
 
-- Functional Settings controls for landscape rotation, keep-screen-awake, and configurable auto-hide behavior.
-- Automatic control hiding after inactivity, with a permanent top-right eye button to show or hide the controls.
-- A permission-denied screen with retry and system-settings actions.
-- Camera-in-use error handling with a retry action.
-- A static in-memory freeze implementation so freezing never creates a file on disk.
-- Larger touch targets and sufficient contrast for basic accessibility.
+- ✅ Functional Settings controls for landscape rotation, keep-screen-awake, and configurable auto-hide behavior.
+- ⏳ Automatic control hiding after inactivity, with a permanent top-right eye button to show or hide the controls.
+- ✅ A permission-denied screen with retry and system-settings actions.
+- ⏳ Camera-in-use error handling with a retry action.
+- ⏳ A static in-memory freeze implementation so freezing never creates a file on disk.
+- ⏳ Larger touch targets and sufficient contrast for basic accessibility.
 
-These items describe the target behavior and are not all implemented yet.
+These items describe the target behavior; checkmarks indicate implemented features, hourglasses indicate work still planned.
 
 ## Tech Stack
 

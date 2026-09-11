@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Pressable,
   Modal,
   ScrollView,
 } from 'react-native';
@@ -141,6 +140,11 @@ export default function DonationPanel({ onClose }) {
         <View
           style={styles.panel}
         >
+        {/* Display the fixed donation heading. */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Buy me a coffee</Text>
+        </View>
+
         {/* Close the DonationPanel and return to the mirror preview. */}
         <TouchableOpacity
           style={styles.closeButton}
@@ -154,9 +158,6 @@ export default function DonationPanel({ onClose }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
         >
-          {/* Explain that the user is voluntarily supporting the application. */}
-          <Text style={styles.title}>Buy me a coffee</Text>
-
         <Text style={styles.description}>
           MirrorVue is free, with no ads, and fully functional for everyone!          
         </Text>
@@ -240,13 +241,20 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 
+  // Keep the card title above the scrollable content.
+  header: {
+    marginBottom: 8,
+    paddingRight: 48,
+  },
+
   // Let donation content shrink to the available height and scroll when needed.
   scrollView: {
     flexShrink: 1,
   },
 
-  // Keep the final billing status clear of the panel edge when the body is scrolled.
+  // Keep the content clear of the fixed header and the panel edge.
   scrollContent: {
+    paddingTop: 16,
     paddingBottom: 8,
   },
 
@@ -274,7 +282,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
 
   // Explain the purpose of the panel without adding unnecessary instructions.

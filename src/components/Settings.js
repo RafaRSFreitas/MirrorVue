@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Pressable,
   Modal,
   Switch,
   TextInput,
@@ -226,9 +225,12 @@ export default function Settings({ visible, onClose }) {
           }
         }}
       >
-        <View
-          style={styles.panel}
-        >
+        <View style={styles.panel}>
+          {/* Display the fixed Settings heading. */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Settings</Text>
+          </View>
+
           {/* Close the Settings panel and return to the mirror preview. */}
           <TouchableOpacity
             style={styles.closeButton}
@@ -243,94 +245,91 @@ export default function Settings({ visible, onClose }) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={true}
           >
-            {/* Display the Settings heading. */}
-            <Text style={styles.title}>Settings</Text>
+            {/* Allow the user to enable portrait and landscape orientation changes. */}
+            <View style={styles.settingRow}>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>Allow landscape mode</Text>
+                <Text style={styles.settingDescription}>
+                  Allow the interface to rotate when the device is turned.
+                </Text>
+              </View>
 
-          {/* Allow the user to enable portrait and landscape orientation changes. */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Allow landscape mode</Text>
-              <Text style={styles.settingDescription}>
-                Allow the interface to rotate when the device is turned.
-              </Text>
-            </View>
-
-            <Switch
-              value={allowLandscape}
-              onValueChange={toggleLandscape}
-            />
-          </View>
-
-          {/* Allow the user to disable the keep-screen-awake behavior. */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Keep screen awake</Text>
-              <Text style={styles.settingDescription}>
-                Prevent the screen from dimming or sleeping while MirrorVue
-                is in the foreground.
-              </Text>
-            </View>
-
-            <Switch
-              value={keepScreenAwake}
-              onValueChange={toggleKeepScreenAwake}
-            />
-          </View>
-
-          {/* Enable the automatic control-hiding preference. */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Auto-hide controls</Text>
-              <Text style={styles.settingDescription}>
-                Hide the mirror controls after a period of inactivity.
-              </Text>
-            </View>
-
-            <Switch
-              value={autoHideControls}
-              onValueChange={toggleAutoHideControls}
-            />
-          </View>
-
-          {/* Only show the timeout control when auto-hide has been enabled. */}
-          {autoHideControls && (
-            <View style={styles.timeoutContainer}>
-              <Text style={styles.timeoutLabel}>
-                Auto-hide timeout (5–99 seconds)
-              </Text>
-
-              <TextInput
-                value={autoHideTimeout}
-                onChangeText={(value) => {
-                  // Keep only numeric characters in the timeout input.
-                  setAutoHideTimeout(value.replace(/[^0-9]/g, ''));
-                }}
-                onBlur={saveAutoHideTimeout}
-                onSubmitEditing={saveAutoHideTimeout}
-                keyboardType="number-pad"
-                maxLength={2}
-                style={styles.timeoutInput}
+              <Switch
+                value={allowLandscape}
+                onValueChange={toggleLandscape}
               />
-
-              <Text style={styles.timeoutHint}>
-                To be implemented soon                
-              </Text>
             </View>
-          )}
 
-          {/* Show future settings as disabled placeholders. */}
-          <Text style={styles.sectionTitle}>Other settings</Text>
+            {/* Allow the user to disable the keep-screen-awake behavior. */}
+            <View style={styles.settingRow}>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>Keep screen awake</Text>
+                <Text style={styles.settingDescription}>
+                  Prevent the screen from dimming or sleeping while MirrorVue
+                  is in the foreground.
+                </Text>
+              </View>
 
-          <View style={styles.placeholderRow}>
-            <Text style={styles.settingTitle}>
-              Keep specific controls always visible
-            </Text>
+              <Switch
+                value={keepScreenAwake}
+                onValueChange={toggleKeepScreenAwake}
+              />
+            </View>
 
-            <Switch
-              value={false}
-              disabled={true}
-            />
-          </View>
+            {/* Enable the automatic control-hiding preference. */}
+            <View style={styles.settingRow}>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>Auto-hide controls</Text>
+                <Text style={styles.settingDescription}>
+                  Hide the mirror controls after a period of inactivity.
+                </Text>
+              </View>
+
+              <Switch
+                value={autoHideControls}
+                onValueChange={toggleAutoHideControls}
+              />
+            </View>
+
+            {/* Only show the timeout control when auto-hide has been enabled. */}
+            {autoHideControls && (
+              <View style={styles.timeoutContainer}>
+                <Text style={styles.timeoutLabel}>
+                  Auto-hide timeout (5–99 seconds)
+                </Text>
+
+                <TextInput
+                  value={autoHideTimeout}
+                  onChangeText={(value) => {
+                    // Keep only numeric characters in the timeout input.
+                    setAutoHideTimeout(value.replace(/[^0-9]/g, ''));
+                  }}
+                  onBlur={saveAutoHideTimeout}
+                  onSubmitEditing={saveAutoHideTimeout}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  style={styles.timeoutInput}
+                />
+
+                <Text style={styles.timeoutHint}>
+                  To be implemented soon
+                </Text>
+              </View>
+            )}
+
+            {/* Show future settings as disabled placeholders. */}
+            <Text style={styles.sectionTitle}>Other settings</Text>
+
+            <View style={styles.placeholderRow}>
+              <Text style={styles.settingTitle}>
+                Keep specific controls always visible
+              </Text>
+
+              <Switch
+                value={false}
+                disabled={true}
+              />
+            </View>
 
             <Text style={styles.placeholderText}>
               Additional control-visibility options are reserved for future
@@ -353,9 +352,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  // Receive dismissal taps only when the touch target is the overlay itself.
-  // (The panel is a sibling above it, so card touches never reach it.)
-
   // Keep the Settings content in a large readable panel over the mirror.
   panel: {
     width: '100%',
@@ -370,13 +366,20 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 
+  // Keep the card title above the scrollable content.
+  header: {
+    marginBottom: 8,
+    paddingRight: 48,
+  },
+
   // Let the settings body shrink to the available height and scroll when needed.
   scrollView: {
     flexShrink: 1,
   },
 
-  // Keep the last setting clear of the panel edge when the body is scrolled.
+  // Keep the content clear of the fixed header and the panel edge.
   scrollContent: {
+    paddingTop: 16,
     paddingBottom: 8,
   },
 
@@ -404,8 +407,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 24,
-    paddingRight: 40,
   },
 
   // Lay out each setting as a label on the left and a switch on the right.

@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Pressable,
   Modal,
   ScrollView,
 } from 'react-native';
@@ -27,9 +26,12 @@ export default function About({ visible, onClose }) {
           }
         }}
       >
-        <View
-          style={styles.panel}
-        >
+        <View style={styles.panel}>
+          {/* Display the fixed About heading. */}
+          <View style={styles.header}>
+            <Text style={styles.title}>MirrorVue</Text>
+          </View>
+
           {/* Close the About panel and return to the mirror preview. */}
           <TouchableOpacity
             style={styles.closeButton}
@@ -44,22 +46,19 @@ export default function About({ visible, onClose }) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={true}
           >
-            {/* Display the application name required by the About screen. */}
-            <Text style={styles.title}>MirrorVue</Text>
+            {/* Display the current application version from package.json. */}
+            <Text style={styles.text}>Version 0.7.0</Text>
 
-          {/* Display the current application version from package.json. */}
-          <Text style={styles.text}>Version 0.6.0</Text>
+            {/* Identify the developer responsible for the application. */}
+            <Text style={styles.text}>Developer: Rafael R. S. Freitas</Text>
 
-          {/* Identify the developer responsible for the application. */}
-          <Text style={styles.text}>Developer: Rafael R. S. Freitas</Text>
+            {/* Briefly describe the purpose of the application. */}
+            <Text style={styles.description}>
+              MirrorVue turns your Android device into a fullscreen
+              digital mirror using the front-facing camera.
+            </Text>
 
-          {/* Briefly describe the purpose of the application. */}
-          <Text style={styles.description}>
-            MirrorVue turns your Android device into a fullscreen
-            digital mirror using the front-facing camera.
-          </Text>
-
-          {/* Explain the privacy behavior required by the product requirements. */}
+            {/* Explain the privacy behavior required by the product requirements. */}
             <Text style={styles.description}>
               Privacy: the camera preview is displayed locally. MirrorVue
               does not upload or transmit your image or video.
@@ -98,13 +97,20 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 
+  // Keep the card title above the scrollable content.
+  header: {
+    marginBottom: 8,
+    paddingRight: 48,
+  },
+
   // Let About content shrink to the available height and scroll when needed.
   scrollView: {
     flexShrink: 1,
   },
 
-  // Keep the final About text clear of the panel edge when the body is scrolled.
+  // Keep the content clear of the fixed header and the panel edge.
   scrollContent: {
+    paddingTop: 16,
     paddingBottom: 8,
   },
 
@@ -132,8 +138,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 12,
-    paddingRight: 40,
   },
 
   // Style the version and developer information shown on the About panel.
