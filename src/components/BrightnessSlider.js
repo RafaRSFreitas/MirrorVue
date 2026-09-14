@@ -8,7 +8,7 @@ const TRACK_HEIGHT = 140;
 const THUMB_SIZE = 24;
 const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
 
-export default function BrightnessSlider() {
+export default function BrightnessSlider({ flashOn }) {
   // This shared value stores the thumb's vertical position, measured down from the top of the track.
   const translateY = useSharedValue(0);
 
@@ -24,6 +24,24 @@ export default function BrightnessSlider() {
       translateY.value = MAX_TRANSLATE * (1 - currentBrightness);
     });
   }, []);
+
+  // Follow the brightness that the flash applies: maximum while it is on, and the
+  // restored level once it turns off again.
+  useEffect(() => {
+    if (flashOn) {
+      // The maximum brightness sits at the top of the track.
+      translateY.value = 0;
+      return undefined;
+    }
+
+    // Wait a moment so the flash can restore the previous brightness first.
+    const timer = setTimeout(() => {
+      Brightness.getBrightnessAsync().then((currentBrightness) => {
+        translateY.value = MAX_TRANSLATE * (1 - currentBrightness);
+      });
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [flashOn]);
 
   // When the user begins dragging, save the current thumb position as the starting point.
   const panGesture = Gesture.Pan()

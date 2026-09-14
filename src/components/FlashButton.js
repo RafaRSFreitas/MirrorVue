@@ -9,7 +9,7 @@ const FRAME_THICKNESS = 100;
 // How long the overlay stays visible after freezing before it is hidden.
 const OVERLAY_HIDE_DELAY = 500;
 
-export default function FlashButton({ controlsVisible, isFrozen, lensId }) {
+export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlashChange }) {
   // Track whether the virtual front flash is currently on.
   const [isOn, setIsOn] = useState(false);
 
@@ -56,6 +56,12 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId }) {
       setIsOverlayHidden(false);
     }
   }, [lensId]);
+
+  // Tell CameraView whenever the flash turns on or off, so other controls such as
+  // the brightness slider can follow the brightness that the flash applies.
+  useEffect(() => {
+    onFlashChange?.(isOn);
+  }, [isOn, onFlashChange]);
 
   // Hide the overlay shortly after freezing while keeping the brightness on, and
   // show it again once the live preview comes back.

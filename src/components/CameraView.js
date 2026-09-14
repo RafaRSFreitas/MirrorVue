@@ -57,6 +57,9 @@ const lastZoomRef = useRef(null);
 // Track whether the controls are currently visible.
 const [controlsVisible, setControlsVisible] = useState(true);
 
+// Track whether the virtual front flash is on, so the brightness slider can follow it.
+const [isFlashOn, setIsFlashOn] = useState(false);
+
 useEffect(() => {
 // Ask the user for camera access when permission has not been granted yet.
 if (!hasPermission) {
@@ -204,6 +207,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
     controlsVisible={controlsVisible}
     isFrozen={isFrozen}
     lensId={device.id}
+    onFlashChange={setIsFlashOn}
   />
 
   {/* Display the top-left menu and its navigation options. */}
@@ -212,7 +216,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   )}
 
   {/* Update cameraZoom whenever the user moves the zoom slider. */}
-  {controlsVisible && (
+  {controlsVisible && !isFrozen && (
     <ZoomSlider 
       minZoom={minZoom} 
       maxZoom={maxZoom} 
@@ -227,7 +231,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   )}
 
   {/* Let the user adjust the screen brightness while the app is open. */}
-  {controlsVisible && <BrightnessSlider />}
+  {controlsVisible && !isFrozen && <BrightnessSlider flashOn={isFlashOn} />}
 
   {/* Only show the lens toggle when the phone actually has more than one front camera,
       and hide it while the image is frozen. */}
