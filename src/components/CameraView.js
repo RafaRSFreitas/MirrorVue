@@ -9,6 +9,7 @@ import BrightnessSlider from './BrightnessSlider';
 import LensButton from './LensButton';
 import Menu from './Menu';
 import EyeButton from './EyeButton';
+import FlashButton from './FlashButton';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -197,6 +198,13 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   {isFrozen && (
     <Image source={{ uri: frozenUri }} style={StyleSheet.absoluteFill} />
   )}
+
+  {/* Let the user light their face with a virtual front flash. */}
+  <FlashButton
+    controlsVisible={controlsVisible}
+    isFrozen={isFrozen}
+    lensId={device.id}
+  />
 
   {/* Display the top-left menu and its navigation options. */}
   {controlsVisible && (
