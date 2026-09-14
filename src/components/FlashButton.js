@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { FontAwesome } from '@react-native-vector-icons/fontawesome/static';
 import * as Brightness from 'expo-brightness';
 
 // Thickness of the white frame that lights up around the screen edges.
-const FRAME_THICKNESS = 50;
+const FRAME_THICKNESS = 100;
 
 // How long the overlay stays visible after freezing before it is hidden.
 const OVERLAY_HIDE_DELAY = 500;
@@ -21,6 +21,11 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId }) {
 
   // Track the current lens so the flash can switch off whenever it changes.
   const previousLensId = useRef(lensId);
+
+  // The light follows the screen orientation: top and bottom in portrait,
+  // left and right in landscape.
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   // While the flash is on, force the screen to its maximum brightness, then put
   // the previous brightness back once the flash turns off.
@@ -75,10 +80,22 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId }) {
 
   return (
     <>
-      {/* Light the face with a white frame around the screen edges. It is rendered
+      {/* Light the face with white bars along the screen edges. They are rendered
           below the other controls so they stay visible and remain usable. */}
-      {isOn && !isOverlayHidden && (
-        <View pointerEvents="none" style={styles.flashOverlay} />
+      {isOn && !isOverlayHidden && !isLandscape && (
+        <>
+          {/* In portrait the light comes from above and below. */}
+          <View pointerEvents="none" style={[styles.topBar, { width }]} />
+          <View pointerEvents="none" style={[styles.bottomBar, { width }]} />
+        </>
+      )}
+
+      {isOn && !isOverlayHidden && isLandscape && (
+        <>
+          {/* In landscape the light comes from the left and right edges. */}
+          <View pointerEvents="none" style={[styles.leftBar, { height }]} />
+          <View pointerEvents="none" style={[styles.rightBar, { height }]} />
+        </>
       )}
 
       {/* Keep the button to the left of the eye and hide it with the other controls. */}
@@ -100,12 +117,36 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId }) {
 }
 
 const styles = StyleSheet.create({
-  // A transparent center with a thick white border creates the light frame.
-  flashOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    borderLeftWidth: FRAME_THICKNESS,
-    borderRightWidth: FRAME_THICKNESS,
-    borderColor: 'white',
+  // Each bar is a direct absolute sibling with explicit dimensions, so it renders
+  // reliably no matter how the camera affects the parent layout. The thickness is
+  // fixed, while the length is supplied at render time from the screen dimensions.
+  topBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: FRAME_THICKNESS,
+    backgroundColor: 'white',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    height: FRAME_THICKNESS,
+    backgroundColor: 'white',
+  },
+  leftBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: FRAME_THICKNESS,
+    backgroundColor: 'white',
+  },
+  rightBar: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: FRAME_THICKNESS,
+    backgroundColor: 'white',
   },
 
   // Place the flash button just to the left of the eye button.
