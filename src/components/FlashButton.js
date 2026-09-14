@@ -98,8 +98,9 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId }) {
         </>
       )}
 
-      {/* Keep the button to the left of the eye and hide it with the other controls. */}
-      {controlsVisible && (
+      {/* Keep the button to the left of the eye; hide it with the other controls and
+          also while frozen with the flash off. */}
+      {controlsVisible && !(isFrozen && !isOn) && (
         <TouchableOpacity
           style={styles.button}
           onPress={toggleFlash}

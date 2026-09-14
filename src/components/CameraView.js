@@ -229,8 +229,9 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   {/* Let the user adjust the screen brightness while the app is open. */}
   {controlsVisible && <BrightnessSlider />}
 
-  {/* Only show the lens toggle when the phone actually has more than one front camera. */}
-  {controlsVisible && frontDevices.length > 1 && (
+  {/* Only show the lens toggle when the phone actually has more than one front camera,
+      and hide it while the image is frozen. */}
+  {controlsVisible && !isFrozen && frontDevices.length > 1 && (
     <LensButton onPress={switchLens} />
   )}
 
