@@ -108,6 +108,8 @@ const styles = StyleSheet.create({
     height: TRACK_HEIGHT,
     borderRadius: 3,
     backgroundColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.7)',
   },
   fill: {
     position: 'absolute',
@@ -115,6 +117,8 @@ const styles = StyleSheet.create({
     width: 6,
     borderRadius: 3,
     backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.7)',
   },
   thumb: {
     position: 'absolute',
@@ -122,6 +126,8 @@ const styles = StyleSheet.create({
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
     backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.7)',
     left: -(THUMB_SIZE - 6) / 2,
     top: 0,
   },

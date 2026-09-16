@@ -97,6 +97,8 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
   },
   fill: {
@@ -105,6 +107,8 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.7)',
   },
   thumb: {
     position: 'absolute',
@@ -112,6 +116,8 @@ const styles = StyleSheet.create({
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
     backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.7)',
     left: 0,
   },
 });
