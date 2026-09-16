@@ -19,8 +19,8 @@ export default function FreezeButton({ isFrozen, onPress }) {
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
-    bottom: 40,
-    right: 40,
+    bottom: 30,
+    right: 30,
     width: 50,
     height: 50,
     borderRadius: 25,
