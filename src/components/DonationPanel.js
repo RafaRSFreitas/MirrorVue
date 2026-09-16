@@ -5,10 +5,9 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Modal,
-  ScrollView,
 } from 'react-native';
 import { useIAP, ErrorCode } from 'expo-iap';
+import ModalShell from './ModalShell';
 
 // These are the four fixed Google Play product IDs defined for MirrorVue.
 // Prices are intentionally not stored here because Google Play provides localized prices at runtime.
@@ -19,7 +18,7 @@ const DONATION_PRODUCT_IDS = [
   'donation_4',
 ];
 
-export default function DonationPanel({ onClose }) {
+export default function DonationPanel({ visible = true, onClose }) {
   // Track which donation option is currently being purchased.
   const [purchasingProductId, setPurchasingProductId] = useState(null);
 
@@ -120,168 +119,78 @@ export default function DonationPanel({ onClose }) {
     }
   };
 
+  // Menu only mounts this panel while it is open, so it defaults to visible
+  // and renders nothing only when explicitly closed through the visible prop.
+  if (!visible) return null;
+
   return (
-    <Modal
+    <ModalShell
       visible
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      navigationBarTranslucent
-      onRequestClose={onClose}
+      title="Buy me a coffee"
+      onClose={onClose}
+      panelStyle={styles.panel}
+      closeTextSize={20}
     >
-      <View
-        style={styles.overlay}
-        onTouchEnd={(event) => {
-          if (event.target === event.currentTarget) {
-            onClose();
-          }
-        }}
-      >
-        <View
-          style={styles.panel}
-        >
-        {/* Display the fixed donation heading. */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Buy me a coffee</Text>
+      <Text style={styles.description}>
+        MirrorVue is free, with no ads, and fully functional for everyone!
+      </Text>
+      <Text style={styles.description}>
+        If you find the app useful, you can support the development through a voluntary donation.
+      </Text>
+
+      {/* Show a loading message while the Google Play connection is being established. */}
+      {!connected && !statusMessage && (
+        <View style={styles.statusContainer}>
+          <ActivityIndicator />
+          <Text style={styles.statusText}>Connecting to Google Play...</Text>
         </View>
+      )}
 
-        {/* Close the DonationPanel and return to the mirror preview. */}
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={onClose}
-            activeOpacity={0.7}>
-          <Text style={styles.closeText}> ✕ </Text>
-        </TouchableOpacity>
+      {/* Display each product exactly as returned by Google Play. */}
+      <View style={styles.productsContainer}>
+        {products.map((product) => (
+          <TouchableOpacity
+            key={product.id}
+            style={styles.productButton}
+            onPress={() => handlePurchase(product.id)}
+            disabled={!connected || !!purchasingProductId}
+          >
+            {isPurchasing(product.id) ? (
+              <ActivityIndicator />
+            ) : (
+              <>
+                {/* Product names come from Google Play rather than being hard-coded. */}
+                <Text style={styles.productTitle}>{product.title}</Text>
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={true}
-        >
-        <Text style={styles.description}>
-          MirrorVue is free, with no ads, and fully functional for everyone!          
-        </Text>
-        <Text style={styles.description}>   
-          If you find the app useful, you can support the development through a voluntary donation.
-        </Text>        
-
-        {/* Show a loading message while the Google Play connection is being established. */}
-        {!connected && !statusMessage && (
-          <View style={styles.statusContainer}>
-            <ActivityIndicator />
-            <Text style={styles.statusText}>Connecting to Google Play...</Text>
-          </View>
-        )}
-
-        {/* Display each product exactly as returned by Google Play. */}
-        <View style={styles.productsContainer}>
-          {products.map((product) => (
-            <TouchableOpacity
-              key={product.id}
-              style={styles.productButton}
-              onPress={() => handlePurchase(product.id)}
-              disabled={!connected || !!purchasingProductId}
-            >
-              {isPurchasing(product.id) ? (
-                <ActivityIndicator />
-              ) : (
-                <>
-                  {/* Product names come from Google Play rather than being hard-coded. */}
-                  <Text style={styles.productTitle}>{product.title}</Text>
-
-                  {/* displayPrice is supplied by Google Play in the user's localized currency. */}
-                  <Text style={styles.productPrice}>{product.displayPrice}</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Explain that no donation is available if Google Play did not return the products. */}
-        {connected && products.length === 0 && !statusMessage && (
-          <Text style={styles.statusText}>
-            Donations are temporarily unavailable.
-          </Text>
-        )}
-
-        {/* Display billing, cancellation, connectivity, and purchase-status information. */}
-          {!!statusMessage && (
-            <Text style={styles.statusText}>{statusMessage}</Text>
-          )}
-        </ScrollView>
-        </View>
+                {/* displayPrice is supplied by Google Play in the user's localized currency. */}
+                <Text style={styles.productPrice}>{product.displayPrice}</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ))}
       </View>
-    </Modal>
+
+      {/* Explain that no donation is available if Google Play did not return the products. */}
+      {connected && products.length === 0 && !statusMessage && (
+        <Text style={styles.statusText}>
+          Donations are temporarily unavailable.
+        </Text>
+      )}
+
+      {/* Display billing, cancellation, connectivity, and purchase-status information. */}
+      {!!statusMessage && (
+        <Text style={styles.statusText}>{statusMessage}</Text>
+      )}
+    </ModalShell>
   );
 }
 
 const styles = StyleSheet.create({
-  // Cover the mirror with a semi-transparent layer while the DonationPanel is open.
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-
-  // Receive dismissal taps only when the touch target is the overlay itself.
-  // (The panel is a sibling above it, so card touches never reach it.)
-
   // Keep the donation choices inside a compact readable panel.
   panel: {
     width: '100%',
     maxWidth: 420,
-    backgroundColor: 'rgba(0,0,0,0.88)',
     borderRadius: 12,
-    padding: 24,
-    maxHeight: '90%',
-    flexShrink: 1,
-    zIndex: 1,
-    elevation: 1,
-  },
-
-  // Keep the card title above the scrollable content.
-  header: {
-    marginBottom: 8,
-    paddingRight: 48,
-  },
-
-  // Let donation content shrink to the available height and scroll when needed.
-  scrollView: {
-    flexShrink: 1,
-  },
-
-  // Keep the content clear of the fixed header and the panel edge.
-  scrollContent: {
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-
-  // Place the close button in the upper-right corner of the panel.
-  closeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 30,
-    elevation: 30,
-  },
-
-  // Use a simple close symbol rather than adding another icon dependency.
-  closeText: {
-    color: 'white',
-    fontSize: 20,
-  },
-
-  // Make the donation heading clearly visible.
-  title: {
-    color: 'white',
-    fontSize: 26,
-    fontWeight: 'bold',
   },
 
   // Explain the purpose of the panel without adding unnecessary instructions.

@@ -19,7 +19,13 @@ const SEARCH_PATH =
   'M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704m512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225t-55.5-273.5t55.5-273.5t150-225t225-150t273.5-55.5t273.5 55.5t225 150t150 225t55.5 273.5q0 220-124 399l343 343q37 37 37 90';
 const SEARCH_VIEW_BOX = '0 0 1664 1664';
 
-export default function ZoomSlider({ minZoom, maxZoom, onZoomChange, resetKey, initialZoom }) {
+export default function ZoomSlider({ device, onZoomChange, resetKey, initialZoom }) {
+  // Use the camera's supported minimum zoom, or 1x if it does not provide one.
+  const minZoom = device.minZoom ?? 1;
+
+  // Limit the slider to 4x zoom because higher digital zoom can reduce image quality.
+  const maxZoom = Math.min(device.maxZoom ?? 4, 4);
+
   // This shared value stores the thumb's horizontal position on the slider.
   const translateX = useSharedValue(0);
 

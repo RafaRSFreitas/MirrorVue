@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, Text, Image, LogBox, AppState } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, Text, LogBox, AppState } from 'react-native';
 import { Camera, useCameraPermission, useCameraDevices } from 'react-native-vision-camera';
-import { File } from 'expo-file-system';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ZoomSlider from './ZoomSlider';
 import FreezeButton from './FreezeButton';
+import FrozenFrame from './FrozenFrame';
 import BrightnessSlider from './BrightnessSlider';
 import LensButton from './LensButton';
 import Menu from './Menu';
@@ -24,32 +23,28 @@ const { hasPermission, requestPermission } = useCameraPermission();
 // Get every camera device on the phone, then keep only the front-facing ones.
 const frontDevices = useCameraDevices().filter((d) => d.position === 'front');
 
-// Track which of the available front lenses is currently selected.
+// Use the lens picked by LensButton, falling back to the first one found.
 const [selectedLensId, setSelectedLensId] = useState(null);
-
-// Use the selected lens once one has been chosen, otherwise fall back to the first one found.
 const device = frontDevices.find((d) => d.id === selectedLensId) ?? frontDevices[0];
 
-// Store the zoom value in React state so the Camera re-renders when it changes.
-const [cameraZoom, setCameraZoom] = useState(null);
-
-// Changing this value tells ZoomSlider to return to its initial position
-const [zoomResetKey, setZoomResetKey] = useState(0);
-
-// A reference to the Camera component, needed to call takeSnapshot() on it directly.
+// A reference to the Camera component, needed by FreezeButton to call takeSnapshot().
 const camera = useRef(null);
 
-// Track whether the preview is currently frozen, and the captured frame to show while it is.
-const [isFrozen, setIsFrozen] = useState(false);
+// The path of the frozen frame, or null while showing the live preview.
 const [frozenUri, setFrozenUri] = useState(null);
-const isFrozenRef = useRef(false);
-const frozenUriRef = useRef(null);
+const isFrozen = frozenUri !== null;
 
 // Track whether the app is currently in the foreground, so the camera can pause in the background.
 const [isAppActive, setIsAppActive] = useState(true);
 
 // The camera should only run when it isn't frozen and the app is actually on screen.
 const cameraActive = !isFrozen && isAppActive;
+
+// Store the zoom value in React state so the Camera re-renders when it changes.
+const [cameraZoom, setCameraZoom] = useState(null);
+
+// Changing this value tells ZoomSlider to return to its initial position
+const [zoomResetKey, setZoomResetKey] = useState(0);
 
 // Remember the most recently applied zoom level, so it can be restored after the camera pauses.
 const lastZoomRef = useRef(null);
@@ -67,32 +62,9 @@ requestPermission();
 }
 }, [hasPermission, requestPermission]);
 
-// Load the previously selected lens, if any, once the available lenses are known.
-useEffect(() => {
-if (frontDevices.length > 0) {
-AsyncStorage.getItem('selectedLensId').then((savedId) => {
-const match = frontDevices.find((d) => d.id === savedId);
-setSelectedLensId(match ? match.id : frontDevices[0].id);
-});
-}
-}, [frontDevices.length]);
-
 // Update isAppActive whenever the app moves between the foreground and background.
 useEffect(() => {
 const subscription = AppState.addEventListener('change', (nextAppState) => {
-if (nextAppState === 'active' && isFrozenRef.current) {
-if (frozenUriRef.current) {
-try {
-new File(frozenUriRef.current).delete();
-} catch (error) {
-// The file may already be gone, which is fine — there is nothing left to clean up.
-}
-}
-frozenUriRef.current = null;
-isFrozenRef.current = false;
-setFrozenUri(null);
-setIsFrozen(false);
-}
 setIsAppActive(nextAppState === 'active');
 });
 return () => subscription.remove();
@@ -120,70 +92,31 @@ return () => clearTimeout(timer);
 }
 }, [cameraActive]);
 
+// When the lens changes, zoom resets since each lens has its own range.
+useEffect(() => {
+if (selectedLensId === null || !device) return;
+
+// Forget the previous lens's zoom.
+lastZoomRef.current = null;
+
+// Start the new lens at its minimum supported zoom.
+setCameraZoom(device.minZoom ?? 1);
+
+// Reset the visual zoom slider to its starting position.
+setZoomResetKey((currentKey) => currentKey + 1);
+}, [selectedLensId]);
+
 // Do not render the camera until the app has permission to use it.
 if (!hasPermission) return null;
 
 // The camera device may take a short time to become available.
 if (!device) {
-return (
-<View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-<Text style={{ color: 'white' }}>Loading camera...</Text> </View>
-);
+  return (
+    <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <Text style={{ color: 'white' }}>Loading camera...</Text>
+    </View>
+  );
 }
-
-// Use the camera's supported minimum zoom, or 1x if it does not provide one.
-const minZoom = device.minZoom ?? 1;
-
-// Limit the slider to 4x zoom because higher digital zoom can reduce image quality.
-const maxZoom = Math.min(device.maxZoom ?? 4, 4);
-
-// Capture the current frame when freezing, or clear it and resume the live preview when unfreezing.
-const toggleFreeze = async () => {
-if (isFrozen) {
-// Unfreeze: resume the live preview.
-if (frozenUriRef.current) {
-try {
-new File(frozenUriRef.current).delete();
-} catch (error) {
-// The file may already be gone, which is fine — there is nothing left to clean up.
-}
-}
-frozenUriRef.current = null;
-isFrozenRef.current = false;
-setFrozenUri(null);
-setIsFrozen(false);
-} else {
-// takeSnapshot() writes the current frame to a temporary file and returns its path.
-const snapshot = await camera.current.takeSnapshot({ quality: 85 });
-const nextFrozenUri = 'file://' + snapshot.path;
-frozenUriRef.current = nextFrozenUri;
-isFrozenRef.current = true;
-setFrozenUri(nextFrozenUri);
-setIsFrozen(true);
-}
-};
-
-// Cycle to the next available front lens. Zoom resets since each lens has its own range.
-const switchLens = () => {
-const currentIndex = frontDevices.findIndex((d) => d.id === device.id);
-const nextDevice = frontDevices[(currentIndex + 1) % frontDevices.length];
-
-// Forget the previous lens's zoom.
-lastZoomRef.current = null;
-
-// Select the new lens.
-setSelectedLensId(nextDevice.id);
-
-// Start the new lens at its minimum supported zoom.
-setCameraZoom(nextDevice.minZoom ?? 1);
-
-// Reset the visual zoom slider to its starting position.
-setZoomResetKey((currentKey) => currentKey + 1);
-
-AsyncStorage.setItem('selectedLensId', nextDevice.id);
-
-
-};
 
 return ( <View style={styles.container}>
 {/* Display the front camera and flip it horizontally to create a mirror effect. */}
@@ -198,9 +131,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
 />
 
   {/* Show the captured frame on top of the camera while frozen. */}
-  {isFrozen && (
-    <Image source={{ uri: frozenUri }} style={StyleSheet.absoluteFill} />
-  )}
+  {frozenUri !== null && <FrozenFrame uri={frozenUri} />}
 
   {/* Let the user light their face with a virtual front flash. */}
   <FlashButton
@@ -218,26 +149,32 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   {/* Update cameraZoom whenever the user moves the zoom slider. */}
   {controlsVisible && !isFrozen && (
     <ZoomSlider 
-      minZoom={minZoom} 
-      maxZoom={maxZoom} 
+      device={device}
       onZoomChange={(newZoom) => setCameraZoom(newZoom)}
       resetKey={zoomResetKey}
-      initialZoom={cameraZoom ?? minZoom}
+      initialZoom={cameraZoom ?? device.minZoom ?? 1}
     />
   )}
 
   {/* Let the user freeze the current frame or return to the live preview. */}
-  {controlsVisible && (
-    <FreezeButton isFrozen={isFrozen} onPress={toggleFreeze} />
-  )}
+  <FreezeButton
+    cameraRef={camera}
+    controlsVisible={controlsVisible}
+    onFrozenChange={setFrozenUri}
+  />
 
   {/* Let the user adjust the screen brightness while the app is open. */}
   {controlsVisible && !isFrozen && <BrightnessSlider flashOn={isFlashOn} />}
 
   {/* Only show the lens toggle when the phone actually has more than one front camera,
       and hide it while the image is frozen. */}
-  {controlsVisible && !isFrozen && frontDevices.length > 1 && (
-    <LensButton onPress={switchLens} />
+  {controlsVisible && !isFrozen && (
+    <LensButton
+      frontDevices={frontDevices}
+      selectedLensId={selectedLensId}
+      controlsVisible={controlsVisible}
+      onLensChange={setSelectedLensId}
+    />
   )}
 
   {/* Keep the eye visible permanently and let it toggle the controls manually. */}

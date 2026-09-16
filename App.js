@@ -8,15 +8,13 @@ import {
 } from 'expo-keep-awake';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import CameraView from './src/components/CameraView';
-
-// Store the key used by Settings.js for the Keep screen awake preference.
-const KEEP_SCREEN_AWAKE_KEY = 'keepScreenAwake';
+import { STORAGE_KEYS } from './src/storageKeys';
 
 export default function App() {
   // Apply the saved Keep screen awake preference when the app is active.
   const applyKeepAwakeSetting = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(KEEP_SCREEN_AWAKE_KEY);
+      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.keepScreenAwake);
 
       // Keep the screen awake by default unless the user explicitly disabled it.
       const keepScreenAwake = savedValue === null || savedValue === 'true';
