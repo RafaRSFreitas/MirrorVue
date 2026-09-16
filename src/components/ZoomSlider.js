@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-native-reanimated';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
@@ -8,12 +8,18 @@ const TRACK_WIDTH = 140;
 const THUMB_SIZE = 24;
 const MAX_TRANSLATE = TRACK_WIDTH - THUMB_SIZE;
 
+// Convert a zoom value into the thumb's horizontal position along the track.
+const zoomToTranslate = (zoom, minZoom, range) => {
+  const progress = range > 0 ? (zoom - minZoom) / range : 0;
+  return Math.max(0, Math.min(progress, 1)) * MAX_TRANSLATE;
+};
+
 // FontAwesome 4.7 "search" glyph, converted to y-down screen coordinates.
 const SEARCH_PATH =
   'M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704m512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225t-55.5-273.5t55.5-273.5t150-225t225-150t273.5-55.5t273.5 55.5t225 150t150 225t55.5 273.5q0 220-124 399l343 343q37 37 37 90';
 const SEARCH_VIEW_BOX = '0 0 1664 1664';
 
-export default function ZoomSlider({ minZoom, maxZoom, onZoomChange, resetKey }) {
+export default function ZoomSlider({ minZoom, maxZoom, onZoomChange, resetKey, initialZoom }) {
   // This shared value stores the thumb's horizontal position on the slider.
   const translateX = useSharedValue(0);
 
@@ -23,16 +29,27 @@ export default function ZoomSlider({ minZoom, maxZoom, onZoomChange, resetKey })
   // This helps avoid sending zoom updates to the camera too frequently.
   const lastUpdate = useSharedValue(0);
 
-  // Reset the slider when the selcted camera lens changes.
+  // The zoom range is the difference between the smallest and largest zoom values.
+  const range = maxZoom - minZoom;
+
+  // Skip the resetKey effect on the initial mount so the thumb starts at the
+  // zoom level supplied via initialZoom (e.g. the zoom restored after unfreezing).
+  const isFirstMount = useRef(true);
+
+  // Reset the slider when the selected camera lens changes.
   useEffect(() => {
+    if (isFirstMount.current) {
+      // Position the thumb at the starting zoom value on first mount.
+      translateX.value = zoomToTranslate(initialZoom ?? minZoom, minZoom, range);
+      isFirstMount.current = false;
+      return;
+    }
+
     translateX.value = 0;
     contextX.value = 0;
     lastUpdate.value = 0;
 
   }, [resetKey]);
-
-  // The zoom range is the difference between the smallest and largest zoom values.
-  const range = maxZoom - minZoom;
 
   // When the user begins dragging, save the current thumb position as the starting point.
   const panGesture = Gesture.Pan()

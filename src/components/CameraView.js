@@ -222,6 +222,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
       maxZoom={maxZoom} 
       onZoomChange={(newZoom) => setCameraZoom(newZoom)}
       resetKey={zoomResetKey}
+      initialZoom={cameraZoom ?? minZoom}
     />
   )}
 
