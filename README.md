@@ -14,7 +14,7 @@ The core mirror works without internet access. Internet access is only needed wh
 - **Brightness control** - An animated vertical slider changes the device screen brightness while the app is in use.
 - **Freeze and unfreeze** - Freezing pauses the live camera and displays a captured frame. Unfreezing removes the temporary snapshot file and resumes the preview, restoring the previous zoom when appropriate.
 - **Front lens selection** - When more than one front-facing camera is available, including virtual camera, a lens button appears in the top-left area. It cycles through the available front lenses, remembers the selected lens between sessions, and resets the zoom slider for the new lens.
-- **Top-left menu** - A hamburger menu opens a semi-transparent menu with Settings, About, and Buy me a coffee.
+- **Top-left menu** - A hamburger menu opens a semi-transparent menu with Settings, About, and Buy me a coffee. The panels share a common modal shell (dimmed overlay, titled card, outside-tap and close-button dismissal).
 - **About screen** - About opens as a centered overlay with the app version, developer information, description, and privacy notice. Tapping outside the card or the close button dismisses it.
 - **Keep screen awake** - The screen stays awake while the app is in the foreground and can sleep normally after the app is backgrounded.
 - **App lifecycle handling** - The camera pauses in the background and resumes in the foreground.
@@ -92,15 +92,19 @@ MirrorVue/
 ├── index.js                        # Entry point
 ├── app.json                        # Expo configuration
 ├── src/
+│   ├── storageKeys.js              # Shared AsyncStorage keys used across screens
 │   └── components/
-│       ├── About.js                # Centered About modal with outside-tap dismissal
+│       ├── About.js                # Centered About modal built on ModalShell
 │       ├── BrightnessSlider.js     # Animated vertical brightness slider (gesture + reanimated)
-│       ├── CameraView.js           # Front camera display, permissions, lens selection, zoom, freeze logic
+│       ├── CameraView.js           # Front camera orchestration: permissions, lens, zoom, freeze
 │       ├── DonationPanel.js        # Google Play donation products and purchase lifecycle
 │       ├── EyeButton.js            # Show / hide the overlay controls
-│       ├── FreezeButton.js         # Freeze / unfreeze toggle button
-│       ├── LensButton.js           # Front-lens switch control
+│       ├── FlashButton.js          # Virtual front flash with screen-edge light frame
+│       ├── FreezeButton.js         # Freeze / unfreeze toggle with snapshot handling
+│       ├── FrozenFrame.js          # Captured frame shown over the camera while frozen
+│       ├── LensButton.js           # Front-lens switch control with session persistence
 │       ├── Menu.js                 # Top-left menu, About navigation, Settings, donation navigation
+│       ├── ModalShell.js           # Shared overlay/panel/close/scroll scaffolding for modals
 │       ├── Settings.js             # Landscape rotation and keep-screen-awake preferences
 │       └── ZoomSlider.js           # Animated horizontal zoom slider (gesture + reanimated)
 └── assets/                         # App icons and splash screen assets
