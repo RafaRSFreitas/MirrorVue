@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, useWindowDimensions, AppState } from 'react-native';
 import { FontAwesome } from '@react-native-vector-icons/fontawesome/static';
 import * as Brightness from 'expo-brightness';
 
@@ -56,6 +56,19 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlash
       setIsOverlayHidden(false);
     }
   }, [lensId]);
+
+  // Turn the flash off whenever the app leaves the foreground, so the forced maximum
+  // brightness is never left stuck on while the screen is off or the app is hidden.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState !== 'active') {
+        setIsOn(false);
+        setIsOverlayHidden(false);
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   // Tell CameraView whenever the flash turns on or off, so other controls such as
   // the brightness slider can follow the brightness that the flash applies.

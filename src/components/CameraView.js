@@ -166,12 +166,26 @@ setCameraZoom(device.minZoom ?? 1);
 setZoomResetKey((currentKey) => currentKey + 1);
 }, [selectedLensId]);
 
-// The camera can report a recoverable problem as an interruption instead of an error,
-// and that is how a camera already owned by another app usually shows up. When the
-// interruption is over the session restarts on its own, so only react to the start.
+// Most interruptions, such as calls or notifications, are temporary and the session
+// restarts on its own, so only show the recovery panel for a condition that will not
+// clear by itself. Anything else is left to recover quietly behind the preview.
 const handleInterruptionStart = () => {
-  // The controller knows exactly whether the camera is held by another app.
-  const cameraInUse = camera.current?.controller?.isUsedByAnotherApp ?? false;
+  // These flags mean the camera is held by another app or blocked by the system.
+  const controller = camera.current?.controller;
+  const cameraInUse = controller?.isUsedByAnotherApp ?? false;
+  const isBlocked = controller?.isSuspended ?? false;
+
+  if (!cameraInUse && !isBlocked) {
+    // Wait a moment, and only report the interruption if it is still not clearing.
+    setTimeout(() => {
+      const stillOpen = camera.current?.controller?.isConnected ?? false;
+      if (!stillOpen) {
+        setCameraError({ cameraInUse: false });
+      }
+    }, 1500);
+    return;
+  }
+
   setCameraError({ cameraInUse });
 };
 
