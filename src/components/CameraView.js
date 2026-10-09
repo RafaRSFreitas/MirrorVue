@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, LogBox, AppState, Linking } from 'react-native';
 import { Camera, useCameraPermission, useCameraDevices } from 'react-native-vision-camera';
-import ZoomSlider from './ZoomSlider';
+import ZoomSlider, { getZoomLayout, FULL_LAYOUT } from './ZoomSlider';
 import FreezeButton from './FreezeButton';
 import FrozenFrame from './FrozenFrame';
-import BrightnessSlider from './BrightnessSlider';
+import BrightnessSlider, { BRIGHTNESS_MIN_HEIGHT } from './BrightnessSlider';
 import LensButton from './LensButton';
 import Menu from './Menu';
 import EyeButton from './EyeButton';
@@ -55,6 +55,18 @@ const [controlsVisible, setControlsVisible] = useState(true);
 
 // Track whether the virtual front flash is on, so the brightness slider can follow it.
 const [isFlashOn, setIsFlashOn] = useState(false);
+
+// Hide the brightness slider and its reset icon when the screen is too short to fit
+// them fully (e.g. in split-screen), so they are never clipped or unusable.
+// The height is measured from the container itself, so it stays correct on resize.
+const [containerHeight, setContainerHeight] = useState(null);
+const showBrightnessSlider =
+  containerHeight === null || containerHeight >= BRIGHTNESS_MIN_HEIGHT;
+
+// Shrink the zoom slider's track (then its right offset) when the container is too
+// narrow to fit the full control, instead of hiding it.
+const [containerWidth, setContainerWidth] = useState(null);
+const zoomLayout = containerWidth === null ? FULL_LAYOUT : getZoomLayout(containerWidth);
 
 // Keep the current camera startup/runtime failure so we can replace the controls
 // with a clear recovery message until the user retries.
@@ -231,7 +243,15 @@ if (!device) {
   );
 }
 
-return ( <View style={styles.container}>
+return ( <View
+  style={styles.container}
+  // Re-measure whenever the container is resized, so the guards react to split-screen.
+  onLayout={(event) => {
+    const { width, height } = event.nativeEvent.layout;
+    setContainerWidth(width);
+    setContainerHeight(height);
+  }}
+>
 {/* Display the front camera and flip it horizontally to create a mirror effect. */}
 <Camera
 ref={camera}
@@ -268,6 +288,8 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
       onZoomChange={(newZoom) => setCameraZoom(newZoom)}
       resetKey={zoomResetKey}
       initialZoom={cameraZoom ?? device.minZoom ?? 1}
+      trackWidth={zoomLayout.trackWidth}
+      rightOffset={zoomLayout.rightOffset}
     />
   )}
 
@@ -279,7 +301,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   />
 
   {/* Let the user adjust the screen brightness while the app is open. */}
-  {controlsVisible && !isFrozen && <BrightnessSlider flashOn={isFlashOn} />}
+  {controlsVisible && !isFrozen && showBrightnessSlider && <BrightnessSlider flashOn={isFlashOn} />}
 
   {/* Only show the lens toggle when the phone actually has more than one front camera,
       and hide it while the image is frozen. */}

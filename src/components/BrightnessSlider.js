@@ -5,9 +5,14 @@ import OutlinedIcon from './OutlinedIcon';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import * as Brightness from 'expo-brightness';
 
-const TRACK_HEIGHT = 120;
-const THUMB_SIZE = 24;
-const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
+export const TRACK_HEIGHT = 120;
+export const THUMB_SIZE = 24;
+export const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
+
+// Vertical space the brightness control needs.
+// CameraView compares the measured container height against this value and hides the
+// slider (and its reset icon) when there is not enough room, e.g. in split-screen.
+export const BRIGHTNESS_MIN_HEIGHT = 345;
 
 // FontAwesome 4.7 "sun-o" glyph, converted to y-down screen coordinates.
 const SUN_PATH =
