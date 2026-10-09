@@ -9,7 +9,7 @@ import LensButton from './LensButton';
 import Menu from './Menu';
 import EyeButton from './EyeButton';
 import FlashButton from './FlashButton';
-import CameraStatusPanel from './CameraStatusPanel';
+import MessageScreen from './MessageScreen';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -178,7 +178,7 @@ const handleInterruptionStart = () => {
 // Explain why permission is needed and offer the appropriate next steps.
 if (!hasPermission) {
   return (
-    <CameraStatusPanel
+    <MessageScreen
       title="Camera permission needed"
       message="Mirror Vue needs camera access to show your mirror. Allow access to continue."
       primaryLabel={canRequestPermission ? 'Allow camera access' : 'Open settings'}
@@ -192,7 +192,7 @@ if (!hasPermission) {
 // If another app owns the camera, ask the user to close it and try again.
 if (cameraError) {
   return (
-    <CameraStatusPanel
+    <MessageScreen
       title={cameraError.cameraInUse ? 'Camera is in use' : 'Camera unavailable'}
       message={
         isRetrying
@@ -210,7 +210,7 @@ if (cameraError) {
 // The camera device may take a short time to become available.
 if (!device) {
   return (
-    <CameraStatusPanel
+    <MessageScreen
       title="Looking for camera"
       message="The front camera is not available yet. Please wait a moment."
     />

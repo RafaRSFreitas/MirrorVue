@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 // A simple full-screen message used when the camera cannot be shown.
 // The parent owns the camera and permission logic; this component only renders it.
-export default function CameraStatusPanel({
+export default function MessageScreen({
   title,
   message,
   primaryLabel,
