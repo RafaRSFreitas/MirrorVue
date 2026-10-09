@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, LogBox, AppState } from 'react-native';
+import { StyleSheet, View, LogBox, AppState, Linking } from 'react-native';
 import { Camera, useCameraPermission, useCameraDevices } from 'react-native-vision-camera';
 import ZoomSlider from './ZoomSlider';
 import FreezeButton from './FreezeButton';
@@ -9,6 +9,7 @@ import LensButton from './LensButton';
 import Menu from './Menu';
 import EyeButton from './EyeButton';
 import FlashButton from './FlashButton';
+import CameraStatusPanel from './CameraStatusPanel';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -18,7 +19,7 @@ LogBox.ignoreLogs([
 
 export default function CameraView() {
 // Get the current permission status and the function used to request permission.
-const { hasPermission, requestPermission } = useCameraPermission();
+const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
 
 // Get every camera device on the phone, then keep only the front-facing ones.
 const frontDevices = useCameraDevices().filter((d) => d.position === 'front');
@@ -55,12 +56,71 @@ const [controlsVisible, setControlsVisible] = useState(true);
 // Track whether the virtual front flash is on, so the brightness slider can follow it.
 const [isFlashOn, setIsFlashOn] = useState(false);
 
-useEffect(() => {
-// Ask the user for camera access when permission has not been granted yet.
-if (!hasPermission) {
-requestPermission();
-}
-}, [hasPermission, requestPermission]);
+// Keep the current camera startup/runtime failure so we can replace the controls
+// with a clear recovery message until the user retries.
+const [cameraError, setCameraError] = useState(null);
+
+// True while the user is retrying, so the retry button can give quick feedback.
+const [isRetrying, setIsRetrying] = useState(false);
+
+const handleRequestPermission = async () => {
+  if (!canRequestPermission) {
+    await Linking.openSettings();
+    return;
+  }
+
+  try {
+    await requestPermission();
+  } catch (error) {
+    // A failed request is not fatal: the panel stays up and the user can tap again.
+  }
+};
+
+// Retry starting the camera: clear the failure, and bring the message back at once
+// if the camera is still not usable, so the button always reacts to the tap.
+const handleRetry = () => {
+  setIsRetrying(true);
+  setCameraError(null);
+
+  setTimeout(() => {
+    const cameraInUse = camera.current?.controller?.isUsedByAnotherApp ?? false;
+    const cameraReady = camera.current?.controller?.isConnected ?? false;
+
+    if (!cameraReady) {
+      setCameraError({ cameraInUse });
+    }
+    setIsRetrying(false);
+  }, 600);
+};
+
+const handleCameraError = (error) => {
+  const message = error?.message?.toLowerCase() ?? '';
+
+  // CameraX can cancel a zoom update while the session is still starting or pausing.
+  // This does not stop the preview, so showing the error screen here would hide a
+  // camera that is otherwise working.
+  const isCancelledZoomUpdate =
+    message.includes('cameracontrol$operationcanceledexception') ||
+    message.includes('cameracontrol$operationcancelexception') ||
+    message.includes('zoom animation was canceled') ||
+    message.includes('camera is not active') ||
+    message.includes('cancelled due to another zoom value being set');
+
+  if (isCancelledZoomUpdate) return;
+
+  // Keep the raw error reachable in development, so the generic branch can be diagnosed.
+  if (__DEV__) {
+    console.warn('Mirror Vue camera error:', error?.message ?? error);
+  }
+
+  // These messages are the ones the camera reports when the camera is already
+  // owned by another app, or when too many cameras are open at once.
+  const cameraInUse =
+    message.includes('already in use') ||
+    message.includes('in use') ||
+    message.includes('maximum number of open cameras');
+  setCameraError({ cameraInUse });
+};
 
 // Update isAppActive whenever the app moves between the foreground and background.
 useEffect(() => {
@@ -106,15 +166,54 @@ setCameraZoom(device.minZoom ?? 1);
 setZoomResetKey((currentKey) => currentKey + 1);
 }, [selectedLensId]);
 
-// Do not render the camera until the app has permission to use it.
-if (!hasPermission) return null;
+// The camera can report a recoverable problem as an interruption instead of an error,
+// and that is how a camera already owned by another app usually shows up. When the
+// interruption is over the session restarts on its own, so only react to the start.
+const handleInterruptionStart = () => {
+  // The controller knows exactly whether the camera is held by another app.
+  const cameraInUse = camera.current?.controller?.isUsedByAnotherApp ?? false;
+  setCameraError({ cameraInUse });
+};
+
+// Explain why permission is needed and offer the appropriate next steps.
+if (!hasPermission) {
+  return (
+    <CameraStatusPanel
+      title="Camera permission needed"
+      message="Mirror Vue needs camera access to show your mirror. Allow access to continue."
+      primaryLabel={canRequestPermission ? 'Allow camera access' : 'Open settings'}
+      onPrimaryPress={handleRequestPermission}
+      secondaryLabel={canRequestPermission ? 'Open settings' : undefined}
+      onSecondaryPress={canRequestPermission ? () => Linking.openSettings() : undefined}
+    />
+  );
+}
+
+// If another app owns the camera, ask the user to close it and try again.
+if (cameraError) {
+  return (
+    <CameraStatusPanel
+      title={cameraError.cameraInUse ? 'Camera is in use' : 'Camera unavailable'}
+      message={
+        isRetrying
+          ? 'Retrying\u2026'
+          : cameraError.cameraInUse
+            ? 'Another app is using the camera. Close that app, then try again.'
+            : 'The camera could not start. Try again in a moment.'
+      }
+      primaryLabel="Retry"
+      onPrimaryPress={handleRetry}
+    />
+  );
+}
 
 // The camera device may take a short time to become available.
 if (!device) {
   return (
-    <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-      <Text style={{ color: 'white' }}>Loading camera...</Text>
-    </View>
+    <CameraStatusPanel
+      title="Looking for camera"
+      message="The front camera is not available yet. Please wait a moment."
+    />
   );
 }
 
@@ -125,7 +224,9 @@ ref={camera}
 style={StyleSheet.absoluteFill}
 device={device}
 isActive={cameraActive}
-mirror={true}
+mirrorMode="on"
+onError={handleCameraError}
+onInterruptionStarted={handleInterruptionStart}
 // Leave zoom undefined at first so the camera can use its default zoom value.
 zoom={cameraZoom !== null ? cameraZoom : undefined}
 />
