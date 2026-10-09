@@ -9,7 +9,15 @@ const FRAME_THICKNESS = 100;
 // How long the overlay stays visible after freezing before it is hidden.
 const OVERLAY_HIDE_DELAY = 500;
 
-export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlashChange }) {
+// The top row can hold up to four buttons:
+//   menu (left 20 + 50) + lens (left 80 + 50)  -> left side ends at 130
+//   flash (right 82 + 50) + eye (right 20 + 50) -> right side starts at width - 132
+// Four icons fit, with a small gap, once width - 132 >= 130 + 12, i.e. width >= 274.
+// On anything narrower the flash icon would land on top of the lens icon, so it is
+// hidden. 
+export const FLASH_MIN_WIDTH = 274;
+
+export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlashChange, visible = true }) {
   // Track whether the virtual front flash is currently on.
   const [isOn, setIsOn] = useState(false);
 
@@ -56,6 +64,15 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlash
       setIsOverlayHidden(false);
     }
   }, [lensId]);
+
+  // If the button is hidden because there is no room for it, make sure the light is
+  // not left stuck on with no way to turn it off.
+  useEffect(() => {
+    if (!visible) {
+      setIsOn(false);
+      setIsOverlayHidden(false);
+    }
+  }, [visible]);
 
   // Turn the flash off whenever the app leaves the foreground, so the forced maximum
   // brightness is never left stuck on while the screen is off or the app is hidden.
@@ -117,9 +134,9 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlash
         </>
       )}
 
-      {/* Keep the button to the left of the eye; hide it with the other controls and
-          also while frozen with the flash off. */}
-      {controlsVisible && !(isFrozen && !isOn) && (
+      {/* Keep the button to the left of the eye; hide it with the other controls,
+          while frozen with the flash off, or when there is no room for it. */}
+      {controlsVisible && visible && !(isFrozen && !isOn) && (
         <TouchableOpacity
           style={styles.button}
           onPress={toggleFlash}

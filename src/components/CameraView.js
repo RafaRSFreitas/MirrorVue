@@ -8,7 +8,7 @@ import BrightnessSlider, { BRIGHTNESS_MIN_HEIGHT } from './BrightnessSlider';
 import LensButton from './LensButton';
 import Menu from './Menu';
 import EyeButton from './EyeButton';
-import FlashButton from './FlashButton';
+import FlashButton, { FLASH_MIN_WIDTH } from './FlashButton';
 import MessageScreen from './MessageScreen';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
@@ -67,6 +67,12 @@ const showBrightnessSlider =
 // narrow to fit the full control, instead of hiding it.
 const [containerWidth, setContainerWidth] = useState(null);
 const zoomLayout = containerWidth === null ? FULL_LAYOUT : getZoomLayout(containerWidth);
+
+// Hide the flash button when the top row cannot fit all four of its icons. The lens
+// button only appears with more than one front camera, and it is the one the flash
+// would overlap on a narrow screen.
+const showFlashButton =
+  containerWidth === null || frontDevices.length <= 1 || containerWidth >= FLASH_MIN_WIDTH;
 
 // Keep the current camera startup/runtime failure so we can replace the controls
 // with a clear recovery message until the user retries.
@@ -271,6 +277,7 @@ zoom={cameraZoom !== null ? cameraZoom : undefined}
   {/* Let the user light their face with a virtual front flash. */}
   <FlashButton
     controlsVisible={controlsVisible}
+    visible={showFlashButton}
     isFrozen={isFrozen}
     lensId={device.id}
     onFlashChange={setIsFlashOn}
