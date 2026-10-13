@@ -104,6 +104,7 @@ MirrorVue/
 │       ├── FrozenFrame.js          # Captured frame shown over the camera while frozen
 │       ├── LensButton.js           # Front-lens switch control with session persistence
 │       ├── Menu.js                 # Top-left menu, About navigation, Settings, donation navigation
+│       ├── MessageScreen.js        # Full-screen message with retry/settings actions when the camera cannot be shown
 │       ├── ModalShell.js           # Shared overlay/panel/close/scroll scaffolding for modals
 │       ├── Settings.js             # Landscape rotation and keep-screen-awake preferences
 │       └── ZoomSlider.js           # Animated horizontal zoom slider (gesture + reanimated)
