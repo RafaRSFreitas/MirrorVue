@@ -7,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import OutlinedIcon from "./OutlinedIcon";
-import { MAX_ZOOM, SLIDER_UPDATE_INTERVAL_MS } from "./constants";
+import { MAX_ZOOM, SLIDER_UPDATE_INTERVAL_MS } from "../constants";
 
 // --- Width tuning knobs -----------------------------------------------------
 // The zoom slider is a right-aligned row: reset icon + gap + track. When the

@@ -8,7 +8,7 @@ import Animated, {
 import OutlinedIcon from "./OutlinedIcon";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import * as Brightness from "expo-brightness";
-import { SLIDER_UPDATE_INTERVAL_MS } from "./constants";
+import { SLIDER_UPDATE_INTERVAL_MS } from "../constants";
 
 const TRACK_HEIGHT = 120;
 const THUMB_SIZE = 24;

@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
-import { SCREEN_MARGIN, TOP_ROW_TOP, controlButtonStyle } from './constants';
+import { SCREEN_MARGIN, TOP_ROW_TOP, controlButtonStyle } from '../constants';
 
 export default function EyeButton({ controlsVisible, onVisibilityChange }) {
   // Show the controls when the user taps the preview.

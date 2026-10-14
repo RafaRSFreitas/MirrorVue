@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { LENS_BUTTON_LEFT, TOP_ROW_TOP, controlButtonStyle } from './constants';
+import { LENS_BUTTON_LEFT, TOP_ROW_TOP, controlButtonStyle } from '../constants';
 
 export default function LensButton({ frontDevices, selectedLensId, onLensChange }) {
   // Cycle to the next available front lens. Zoom resets since each lens has its own range.

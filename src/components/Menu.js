@@ -15,7 +15,7 @@ import {
   SCREEN_MARGIN,
   TOP_ROW_TOP,
   controlButtonStyle,
-} from "./constants";
+} from "../constants";
 
 export default function Menu() {
   // Track whether the top-left menu dropdown is currently open.

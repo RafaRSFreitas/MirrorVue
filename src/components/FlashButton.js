@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
 import * as Brightness from "expo-brightness";
-import { FLASH_BUTTON_RIGHT, TOP_ROW_TOP, controlButtonStyle } from './constants';
+import { FLASH_BUTTON_RIGHT, TOP_ROW_TOP, controlButtonStyle } from '../constants';
 
 // Thickness of the white frame that lights up around the screen edges.
 const FRAME_THICKNESS = 100;

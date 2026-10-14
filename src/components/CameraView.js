@@ -15,7 +15,9 @@ import EyeButton from "./EyeButton";
 import FlashButton from "./FlashButton";
 import MessageScreen from "./MessageScreen";
 import { STORAGE_KEYS, loadSetting, saveSetting } from '../storage';
-import { FLASH_MIN_WIDTH, ZOOM_RESTORE_DELAY_MS } from './constants';
+import { FLASH_MIN_WIDTH, ZOOM_RESTORE_DELAY_MS } from '../constants';
+import useFrozenFrame from '../hooks/useFrozenFrame';
+import useCameraErrors from '../hooks/useCameraErrors';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -51,12 +53,11 @@ export default function CameraView() {
     saveSetting(STORAGE_KEYS.selectedLensId, lensId);
   };
 
-  // A reference to the Camera component, needed by FreezeButton to call takeSnapshot().
+  // A reference to the Camera component, needed to take the snapshot used to freeze the image.
   const camera = useRef(null);
 
-  // The path of the frozen frame, or null while showing the live preview.
-  const [frozenUri, setFrozenUri] = useState(null);
-  const isFrozen = frozenUri !== null;
+  // The frozen frame (null while the live preview is showing) and the function that toggles it.
+  const { frozenUri, isFrozen, toggleFreeze } = useFrozenFrame(camera);
 
   // Track whether the app is currently in the foreground, so the camera can pause in the background.
   const [isAppActive, setIsAppActive] = useState(true);
@@ -100,12 +101,9 @@ export default function CameraView() {
     frontDevices.length <= 1 ||
     containerWidth >= FLASH_MIN_WIDTH;
 
-  // Keep the current camera startup/runtime failure so we can replace the controls
-  // with a clear recovery message until the user retries.
-  const [cameraError, setCameraError] = useState(null);
-
-  // True while the user is retrying, so the retry button can give quick feedback.
-  const [isRetrying, setIsRetrying] = useState(false);
+  // Camera failures (camera in use, camera could not start) and the Retry button.
+  const { cameraError, isRetrying, handleRetry, handleCameraError, handleInterruptionStart } =
+    useCameraErrors(camera);
 
   const handleRequestPermission = async () => {
     if (!canRequestPermission) {
@@ -118,53 +116,6 @@ export default function CameraView() {
     } catch (error) {
       // A failed request is not fatal: the panel stays up and the user can tap again.
     }
-  };
-
-  // Retry starting the camera: clear the failure, and bring the message back at once
-  // if the camera is still not usable, so the button always reacts to the tap.
-  const handleRetry = () => {
-    setIsRetrying(true);
-    setCameraError(null);
-
-    setTimeout(() => {
-      const cameraInUse =
-        camera.current?.controller?.isUsedByAnotherApp ?? false;
-      const cameraReady = camera.current?.controller?.isConnected ?? false;
-
-      if (!cameraReady) {
-        setCameraError({ cameraInUse });
-      }
-      setIsRetrying(false);
-    }, 600);
-  };
-
-  const handleCameraError = (error) => {
-    const message = error?.message?.toLowerCase() ?? "";
-
-    // CameraX can cancel a zoom update while the session is still starting or pausing.
-    // This does not stop the preview, so showing the error screen here would hide a
-    // camera that is otherwise working.
-    const isCancelledZoomUpdate =
-      message.includes("cameracontrol$operationcanceledexception") ||
-      message.includes("cameracontrol$operationcancelexception") ||
-      message.includes("zoom animation was canceled") ||
-      message.includes("camera is not active") ||
-      message.includes("cancelled due to another zoom value being set");
-
-    if (isCancelledZoomUpdate) return;
-
-    // Keep the raw error reachable in development, so the generic branch can be diagnosed.
-    if (__DEV__) {
-      console.warn("Mirror Vue camera error:", error?.message ?? error);
-    }
-
-    // These messages are the ones the camera reports when the camera is already
-    // owned by another app, or when too many cameras are open at once.
-    const cameraInUse =
-      message.includes("already in use") ||
-      message.includes("in use") ||
-      message.includes("maximum number of open cameras");
-    setCameraError({ cameraInUse });
   };
 
   // Update isAppActive whenever the app moves between the foreground and background.
@@ -211,29 +162,6 @@ export default function CameraView() {
     setZoomResetKey((currentKey) => currentKey + 1);
   }, [selectedLensId]);
 
-  // Most interruptions, such as calls or notifications, are temporary and the session
-  // restarts on its own, so only show the recovery panel for a condition that will not
-  // clear by itself. Anything else is left to recover quietly behind the preview.
-  const handleInterruptionStart = () => {
-    // These flags mean the camera is held by another app or blocked by the system.
-    const controller = camera.current?.controller;
-    const cameraInUse = controller?.isUsedByAnotherApp ?? false;
-    const isBlocked = controller?.isSuspended ?? false;
-
-    if (!cameraInUse && !isBlocked) {
-      // Wait a moment, and only report the interruption if it is still not clearing.
-      setTimeout(() => {
-        const stillOpen = camera.current?.controller?.isConnected ?? false;
-        if (!stillOpen) {
-          setCameraError({ cameraInUse: false });
-        }
-      }, 1500);
-      return;
-    }
-
-    setCameraError({ cameraInUse });
-  };
-
   // Explain why permission is needed and offer the appropriate next steps.
   if (!hasPermission) {
     return (
@@ -252,7 +180,7 @@ export default function CameraView() {
     );
   }
 
-  // If another app owns the camera, ask the user to close it and try again.
+  // If the camera is in use by another app, or could not start, explain it and offer Retry.
   if (cameraError) {
     return (
       <MessageScreen
@@ -333,11 +261,7 @@ export default function CameraView() {
       )}
 
       {/* Let the user freeze the current frame or return to the live preview. */}
-      <FreezeButton
-        cameraRef={camera}
-        controlsVisible={controlsVisible}
-        onFrozenChange={setFrozenUri}
-      />
+      <FreezeButton isFrozen={isFrozen} controlsVisible={controlsVisible} onPress={toggleFreeze} />
 
       {/* Let the user adjust the screen brightness while the app is open. */}
       {controlsVisible && !isFrozen && showBrightnessSlider && (
