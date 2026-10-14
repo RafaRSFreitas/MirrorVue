@@ -8,20 +8,13 @@ import {
 } from "react-native";
 import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
 import * as Brightness from "expo-brightness";
+import { FLASH_BUTTON_RIGHT, TOP_ROW_TOP, controlButtonStyle } from './constants';
 
 // Thickness of the white frame that lights up around the screen edges.
 const FRAME_THICKNESS = 100;
 
 // How long the overlay stays visible after freezing before it is hidden.
 const OVERLAY_HIDE_DELAY = 500;
-
-// The top row can hold up to four buttons:
-//   menu (left 20 + 50) + lens (left 80 + 50)  -> left side ends at 130
-//   flash (right 82 + 50) + eye (right 20 + 50) -> right side starts at width - 132
-// Four icons fit, with a small gap, once width - 132 >= 130 + 12, i.e. width >= 274.
-// On anything narrower the flash icon would land on top of the lens icon, so it is
-// hidden.
-export const FLASH_MIN_WIDTH = 274;
 
 export default function FlashButton({
   controlsVisible,
@@ -153,7 +146,7 @@ export default function FlashButton({
           while frozen with the flash off, or when there is no room for it. */}
       {controlsVisible && visible && !(isFrozen && !isOn) && (
         <TouchableOpacity
-          style={styles.button}
+          style={[controlButtonStyle, styles.button]}
           onPress={toggleFlash}
           activeOpacity={0.7}
         >
@@ -204,14 +197,8 @@ const styles = StyleSheet.create({
   // Place the flash button just to the left of the eye button.
   button: {
     position: "absolute",
-    top: 40,
-    right: 82,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(82, 82, 82, 0.37)",
-    justifyContent: "center",
-    alignItems: "center",
+    top: TOP_ROW_TOP,
+    right: FLASH_BUTTON_RIGHT,
     zIndex: 20,
     elevation: 20,
   },

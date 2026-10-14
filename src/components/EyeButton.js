@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
+import { SCREEN_MARGIN, TOP_ROW_TOP, controlButtonStyle } from './constants';
 
 export default function EyeButton({ controlsVisible, onVisibilityChange }) {
   // Show the controls when the user taps the preview.
@@ -20,7 +21,7 @@ export default function EyeButton({ controlsVisible, onVisibilityChange }) {
       <Pressable style={styles.activityLayer} onPress={showControls} />
       {/* Keep the eye permanently visible in the top-right corner. */}
       <TouchableOpacity
-        style={styles.button}
+        style={[controlButtonStyle, styles.button]}
         onPress={toggleVisibility}
         activeOpacity={0.7}
       >
@@ -45,14 +46,8 @@ const styles = StyleSheet.create({
   // Keep the eye permanently in the top-right corner of the mirror preview.
   button: {
     position: "absolute",
-    top: 40,
-    right: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(82, 82, 82, 0.37)",
-    justifyContent: "center",
-    alignItems: "center",
+    top: TOP_ROW_TOP,
+    right: SCREEN_MARGIN,
     zIndex: 20,
     elevation: 20,
   },

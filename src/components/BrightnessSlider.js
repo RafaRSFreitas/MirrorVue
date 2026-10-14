@@ -8,10 +8,11 @@ import Animated, {
 import OutlinedIcon from "./OutlinedIcon";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import * as Brightness from "expo-brightness";
+import { SLIDER_UPDATE_INTERVAL_MS } from "./constants";
 
-export const TRACK_HEIGHT = 120;
-export const THUMB_SIZE = 24;
-export const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
+const TRACK_HEIGHT = 120;
+const THUMB_SIZE = 24;
+const MAX_TRANSLATE = TRACK_HEIGHT - THUMB_SIZE;
 
 // Vertical space the brightness control needs.
 // CameraView compares the measured container height against this value and hides the
@@ -79,9 +80,9 @@ export default function BrightnessSlider({ flashOn }) {
       // so brightness is the opposite of how far down the thumb has moved.
       const brightness = 1 - nextY / MAX_TRANSLATE;
 
-      // Only update the screen brightness every 150 milliseconds while the finger is moving.
+      // Only update the screen brightness every SLIDER_UPDATE_INTERVAL_MS while the finger is moving.
       const now = Date.now();
-      if (now - lastUpdate.value > 150) {
+      if (now - lastUpdate.value > SLIDER_UPDATE_INTERVAL_MS) {
         lastUpdate.value = now;
         runOnJS(Brightness.setBrightnessAsync)(brightness);
       }

@@ -7,17 +7,18 @@ import Animated, {
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import OutlinedIcon from "./OutlinedIcon";
+import { MAX_ZOOM, SLIDER_UPDATE_INTERVAL_MS } from "./constants";
 
 // --- Width tuning knobs -----------------------------------------------------
 // The zoom slider is a right-aligned row: reset icon + gap + track. When the
 // container is narrow (e.g. split-screen) the track shrinks first, and only once
 // it reaches its floor does the right offset shrink too, so the control fits.
-export const TRACK_WIDTH = 140; // full-size track
-export const MIN_TRACK_WIDTH = TRACK_WIDTH / 2; // 70 - track stops shrinking at 50%
+const TRACK_WIDTH = 140; // full-size track
+const MIN_TRACK_WIDTH = TRACK_WIDTH / 2; // 70 - track stops shrinking at 50%
 const ICON_WIDTH = 30; // reset icon width (styles.iconButton)
 const WRAPPER_GAP = 12; // icon-to-track gap (styles.wrapper)
-export const RIGHT_OFFSET_MAX = 100; // full offset (styles.wrapper.right)
-export const RIGHT_OFFSET_MIN = 16; // closest the control may sit to the edge
+const RIGHT_OFFSET_MAX = 100; // full offset (styles.wrapper.right)
+const RIGHT_OFFSET_MIN = 16; // closest the control may sit to the edge
 const LEFT_MARGIN = 24; // breathing room on the left
 
 const THUMB_SIZE = 24;
@@ -72,8 +73,8 @@ export default function ZoomSlider({
   // Use the camera's supported minimum zoom, or 1x if it does not provide one.
   const minZoom = device.minZoom ?? 1;
 
-  // Limit the slider to 4x zoom because higher digital zoom can reduce image quality.
-  const maxZoom = Math.min(device.maxZoom ?? 4, 4);
+  // Limit the slider to MAX_ZOOM because higher digital zoom can reduce image quality.
+  const maxZoom = Math.min(device.maxZoom ?? MAX_ZOOM, MAX_ZOOM);
 
   // How far the thumb may travel, based on the current track width.
   const maxTranslate = trackWidth - THUMB_SIZE;
@@ -144,9 +145,9 @@ export default function ZoomSlider({
       // Use that progress value to calculate the camera's current zoom level.
       const currentZoom = minZoom + progress * range;
 
-      // Only update the camera every 150 milliseconds while the finger is moving.
+      // Only update the camera every SLIDER_UPDATE_INTERVAL_MS while the finger is moving.
       const now = Date.now();
-      if (now - lastUpdate.value > 150) {
+      if (now - lastUpdate.value > SLIDER_UPDATE_INTERVAL_MS) {
         lastUpdate.value = now;
         runOnJS(onZoomChange)(currentZoom);
       }

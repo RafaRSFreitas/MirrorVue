@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { LENS_BUTTON_LEFT, TOP_ROW_TOP, controlButtonStyle } from './constants';
 
 export default function LensButton({ frontDevices, selectedLensId, onLensChange }) {
   // Cycle to the next available front lens. Zoom resets since each lens has its own range.
@@ -17,7 +18,7 @@ export default function LensButton({ frontDevices, selectedLensId, onLensChange 
 
   return (
     // Tapping this button cycles to the next available front lens.
-    <TouchableOpacity style={styles.button} onPress={switchLens}>
+    <TouchableOpacity style={[controlButtonStyle, styles.button]} onPress={switchLens}>
       <Text style={styles.label}>⇄</Text>
     </TouchableOpacity>
   );
@@ -26,14 +27,8 @@ export default function LensButton({ frontDevices, selectedLensId, onLensChange 
 const styles = StyleSheet.create({
   button: {
     position: "absolute",
-    top: 40,
-    left: 80,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(82, 82, 82, 0.37)",
-    justifyContent: "center",
-    alignItems: "center",
+    top: TOP_ROW_TOP,
+    left: LENS_BUTTON_LEFT,
   },
   label: {
     color: "white",

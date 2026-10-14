@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, AppState } from "react-native";
 import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
 import { File } from "expo-file-system";
+import { controlButtonStyle } from './constants';
 
 // Delete the temporary snapshot file, if it still exists.
 const deleteSnapshot = (uri) => {
@@ -13,11 +14,9 @@ const deleteSnapshot = (uri) => {
   }
 };
 
-export default function FreezeButton({
-  cameraRef,
-  controlsVisible,
-  onFrozenChange,
-}) {
+// The freeze / unfreeze button. CameraView owns the frozen state (through useFrozenFrame),
+// so this button only shows it and reports taps.
+export default function FreezeButton({ isFrozen, controlsVisible, onPress }) {
   // Track whether the preview is currently frozen, and the captured frame to show while it is.
   const [isFrozen, setIsFrozen] = useState(false);
   const [frozenUri, setFrozenUri] = useState(null);
@@ -77,13 +76,9 @@ export default function FreezeButton({
 
   return (
     // Tapping this button freezes the current frame or returns to the live preview.
-    <TouchableOpacity style={styles.button} onPress={toggleFreeze}>
+    <TouchableOpacity style={[controlButtonStyle, styles.button]} onPress={onPress}>
       {/* Show a different symbol depending on whether the camera is currently frozen. */}
-      <FontAwesome
-        name={isFrozen ? "play" : "snowflake-o"}
-        size={22}
-        color="white"
-      />
+      <FontAwesome name={isFrozen ? "play" : "snowflake-o"} size={22} color="white" />
     </TouchableOpacity>
   );
 }
@@ -93,11 +88,5 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 30,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(82, 82, 82, 0.37)",
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

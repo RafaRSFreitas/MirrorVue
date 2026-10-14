@@ -9,6 +9,13 @@ import {
 import About from "./About";
 import DonationPanel from "./DonationPanel";
 import Settings from "./Settings";
+import {
+  CONTROL_BACKGROUND,
+  CONTROL_SIZE,
+  SCREEN_MARGIN,
+  TOP_ROW_TOP,
+  controlButtonStyle,
+} from "./constants";
 
 export default function Menu() {
   // Track whether the top-left menu dropdown is currently open.
@@ -64,7 +71,7 @@ export default function Menu() {
   return (
     <>
       {/* Open the top-left menu with Settings, About, and Buy me a coffee. */}
-      <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
+      <TouchableOpacity style={[controlButtonStyle, styles.menuButton]} onPress={toggleMenu}>
         <Text style={styles.menuIcon}>☰</Text>
       </TouchableOpacity>
 
@@ -114,14 +121,8 @@ const styles = StyleSheet.create({
   // Keep the hamburger button in the top-left corner of the mirror preview.
   menuButton: {
     position: "absolute",
-    top: 40,
-    left: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(82, 82, 82, 0.37)",
-    justifyContent: "center",
-    alignItems: "center",
+    top: TOP_ROW_TOP,
+    left: SCREEN_MARGIN,
     zIndex: 10,
   },
 
@@ -145,10 +146,10 @@ const styles = StyleSheet.create({
   // Display the menu as a small semi-transparent dropdown beneath the hamburger button.
   menuDropdown: {
     position: "absolute",
-    top: 95,
-    left: 20,
+    top: TOP_ROW_TOP + CONTROL_SIZE + 5,
+    left: SCREEN_MARGIN,
     width: 190,
-    backgroundColor: "rgba(82, 82, 82, 0.37)",
+    backgroundColor: CONTROL_BACKGROUND,
     borderRadius: 18,
     overflow: "hidden",
     zIndex: 10,

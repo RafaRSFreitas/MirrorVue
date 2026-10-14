@@ -12,9 +12,10 @@ import BrightnessSlider, { BRIGHTNESS_MIN_HEIGHT } from "./BrightnessSlider";
 import LensButton from "./LensButton";
 import Menu from "./Menu";
 import EyeButton from "./EyeButton";
-import FlashButton, { FLASH_MIN_WIDTH } from "./FlashButton";
+import FlashButton from "./FlashButton";
 import MessageScreen from "./MessageScreen";
 import { STORAGE_KEYS, loadSetting, saveSetting } from '../storage';
+import { FLASH_MIN_WIDTH, ZOOM_RESTORE_DELAY_MS } from './constants';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -191,7 +192,7 @@ export default function CameraView() {
       setCameraZoom(null);
       const timer = setTimeout(() => {
         setCameraZoom(zoomToRestore);
-      }, 100); // Small delay to let the camera finish re-initialising.
+      }, ZOOM_RESTORE_DELAY_MS); // Let the camera finish re-initialising first.
       return () => clearTimeout(timer);
     }
   }, [cameraActive]);
