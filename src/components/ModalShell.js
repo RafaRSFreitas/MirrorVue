@@ -76,9 +76,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  // Receive dismissal taps only when the touch target is the overlay itself.
-  // (The panel is a sibling above it, so card touches never reach it.)
-
   // Keep the panel content inside a centered readable card.
   panel: {
     width: "90%",

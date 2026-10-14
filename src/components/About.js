@@ -1,12 +1,15 @@
 import React from "react";
 import { StyleSheet, Text } from "react-native";
+import appConfig from '../../app.json';
 import ModalShell from "./ModalShell";
+
+const APP_VERSION = appConfig.expo.version;
 
 export default function About({ visible, onClose }) {
   return (
     <ModalShell visible={visible} title="MirrorVue" onClose={onClose}>
-      {/* Display the current application version from package.json. */}
-      <Text style={styles.text}>Version 0.9.1</Text>
+      {/* Display the current application version. */}
+      <Text style={styles.text}>Version {APP_VERSION}</Text>
 
       {/* Identify the developer responsible for the application. */}
       <Text style={styles.text}>Developer: Rafael R. S. Freitas</Text>
