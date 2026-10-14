@@ -61,6 +61,16 @@ export default function FlashButton({
     };
   }, [isOn]);
 
+  // If this button disappears while the flash is on (for example when the camera error
+  // screen takes over), put the previous brightness back so it is not left at maximum.
+  useEffect(() => {
+    return () => {
+      if (previousBrightness.current !== null) {
+        Brightness.setBrightnessAsync(previousBrightness.current);
+      }
+    };
+  }, []);
+
   // Turn the flash off whenever the user switches to another lens.
   useEffect(() => {
     if (previousLensId.current !== lensId) {
