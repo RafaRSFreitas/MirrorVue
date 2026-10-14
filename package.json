@@ -13,8 +13,6 @@
     "expo-keep-awake": "~57.0.1",
     "expo-modules-autolinking": "~57.0.0",
     "expo-screen-orientation": "~57.0.2",
-    "expo-sensors": "~57.0.2",
-    "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-edge-to-edge": "^1.8.1",
@@ -27,8 +25,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web"
+    "ios": "expo run:ios"
   },
   "private": true,
   "devDependencies": {
