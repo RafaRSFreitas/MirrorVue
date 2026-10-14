@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, AppState } from 'react-native';
-import { FontAwesome } from '@react-native-vector-icons/fontawesome/static';
-import { File } from 'expo-file-system';
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, TouchableOpacity, AppState } from "react-native";
+import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
+import { File } from "expo-file-system";
 
 // Delete the temporary snapshot file, if it still exists.
 const deleteSnapshot = (uri) => {
@@ -13,7 +13,11 @@ const deleteSnapshot = (uri) => {
   }
 };
 
-export default function FreezeButton({ cameraRef, controlsVisible, onFrozenChange }) {
+export default function FreezeButton({
+  cameraRef,
+  controlsVisible,
+  onFrozenChange,
+}) {
   // Track whether the preview is currently frozen, and the captured frame to show while it is.
   const [isFrozen, setIsFrozen] = useState(false);
   const [frozenUri, setFrozenUri] = useState(null);
@@ -35,7 +39,7 @@ export default function FreezeButton({ cameraRef, controlsVisible, onFrozenChang
   const freeze = async () => {
     // takeSnapshot() writes the current frame to a temporary file and returns its path.
     const snapshot = await cameraRef.current.takeSnapshot({ quality: 85 });
-    const nextFrozenUri = 'file://' + snapshot.path;
+    const nextFrozenUri = "file://" + snapshot.path;
     frozenUriRef.current = nextFrozenUri;
     isFrozenRef.current = true;
     setFrozenUri(nextFrozenUri);
@@ -51,8 +55,8 @@ export default function FreezeButton({ cameraRef, controlsVisible, onFrozenChang
   // If the app returns to the foreground while a frame is frozen, clear the frame
   // so the live preview comes back instead of a stale image.
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active' && isFrozenRef.current) {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active" && isFrozenRef.current) {
         unfreeze();
       }
     });
@@ -76,7 +80,7 @@ export default function FreezeButton({ cameraRef, controlsVisible, onFrozenChang
     <TouchableOpacity style={styles.button} onPress={toggleFreeze}>
       {/* Show a different symbol depending on whether the camera is currently frozen. */}
       <FontAwesome
-        name={isFrozen ? 'play' : 'snowflake-o'}
+        name={isFrozen ? "play" : "snowflake-o"}
         size={22}
         color="white"
       />
@@ -86,14 +90,14 @@ export default function FreezeButton({ cameraRef, controlsVisible, onFrozenChang
 
 const styles = StyleSheet.create({
   button: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 30,
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(82, 82, 82, 0.37)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(82, 82, 82, 0.37)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

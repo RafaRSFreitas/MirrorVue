@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Pressable } from 'react-native';
-import About from './About';
-import DonationPanel from './DonationPanel';
-import Settings from './Settings';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
+import About from "./About";
+import DonationPanel from "./DonationPanel";
+import Settings from "./Settings";
 
 export default function Menu() {
   // Track whether the top-left menu dropdown is currently open.
@@ -99,9 +105,7 @@ export default function Menu() {
       <Settings visible={isSettingsOpen} onClose={closeSettings} />
 
       {/* Display the DonationPanel when the user chooses Buy me a coffee. */}
-      {isDonationOpen && (
-        <DonationPanel onClose={closeDonation} />
-      )}
+      {isDonationOpen && <DonationPanel onClose={closeDonation} />}
     </>
   );
 }
@@ -109,28 +113,28 @@ export default function Menu() {
 const styles = StyleSheet.create({
   // Keep the hamburger button in the top-left corner of the mirror preview.
   menuButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     left: 20,
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(82, 82, 82, 0.37)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(82, 82, 82, 0.37)",
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 10,
   },
 
   // Style the hamburger icon so it is easy to see against the camera preview.
   menuIcon: {
-    color: 'white',
+    color: "white",
     fontSize: 24,
   },
 
   // A transparent full-screen layer that catches taps outside the dropdown.
   // It renders below the button and dropdown (zIndex 5) so they stay usable.
   menuOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -140,26 +144,26 @@ const styles = StyleSheet.create({
 
   // Display the menu as a small semi-transparent dropdown beneath the hamburger button.
   menuDropdown: {
-    position: 'absolute',
+    position: "absolute",
     top: 95,
     left: 20,
     width: 190,
-    backgroundColor: 'rgba(82, 82, 82, 0.37)',
+    backgroundColor: "rgba(82, 82, 82, 0.37)",
     borderRadius: 18,
-    overflow: 'hidden',
+    overflow: "hidden",
     zIndex: 10,
   },
 
   // Give each menu option enough vertical space to be comfortably selectable.
   menuItem: {
     minHeight: 50,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 16,
   },
 
   // Use a high-contrast text color for the menu options.
   menuItemText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
   },
 });

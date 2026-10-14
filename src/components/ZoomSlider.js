@@ -1,20 +1,24 @@
-import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, runOnJS } from 'react-native-reanimated';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import OutlinedIcon from './OutlinedIcon';
+import React, { useEffect, useRef } from "react";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  runOnJS,
+} from "react-native-reanimated";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import OutlinedIcon from "./OutlinedIcon";
 
 // --- Width tuning knobs -----------------------------------------------------
 // The zoom slider is a right-aligned row: reset icon + gap + track. When the
 // container is narrow (e.g. split-screen) the track shrinks first, and only once
 // it reaches its floor does the right offset shrink too, so the control fits.
-export const TRACK_WIDTH = 140;                 // full-size track
+export const TRACK_WIDTH = 140; // full-size track
 export const MIN_TRACK_WIDTH = TRACK_WIDTH / 2; // 70 - track stops shrinking at 50%
-const ICON_WIDTH = 30;                          // reset icon width (styles.iconButton)
-const WRAPPER_GAP = 12;                         // icon-to-track gap (styles.wrapper)
-export const RIGHT_OFFSET_MAX = 100;            // full offset (styles.wrapper.right)
-export const RIGHT_OFFSET_MIN = 16;             // closest the control may sit to the edge
-const LEFT_MARGIN = 24;                         // breathing room on the left
+const ICON_WIDTH = 30; // reset icon width (styles.iconButton)
+const WRAPPER_GAP = 12; // icon-to-track gap (styles.wrapper)
+export const RIGHT_OFFSET_MAX = 100; // full offset (styles.wrapper.right)
+export const RIGHT_OFFSET_MIN = 16; // closest the control may sit to the edge
+const LEFT_MARGIN = 24; // breathing room on the left
 
 const THUMB_SIZE = 24;
 
@@ -41,7 +45,10 @@ export function getZoomLayout(containerWidth) {
 }
 
 // Layout used before the container has been measured.
-export const FULL_LAYOUT = { trackWidth: TRACK_WIDTH, rightOffset: RIGHT_OFFSET_MAX };
+export const FULL_LAYOUT = {
+  trackWidth: TRACK_WIDTH,
+  rightOffset: RIGHT_OFFSET_MAX,
+};
 
 // Convert a zoom value into the thumb's horizontal position along the track.
 const zoomToTranslate = (zoom, minZoom, range, maxTranslate) => {
@@ -51,8 +58,8 @@ const zoomToTranslate = (zoom, minZoom, range, maxTranslate) => {
 
 // FontAwesome 4.7 "search" glyph, converted to y-down screen coordinates.
 const SEARCH_PATH =
-  'M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704m512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225t-55.5-273.5t55.5-273.5t150-225t225-150t273.5-55.5t273.5 55.5t225 150t150 225t55.5 273.5q0 220-124 399l343 343q37 37 37 90';
-const SEARCH_VIEW_BOX = '0 0 1664 1664';
+  "M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704m512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225t-55.5-273.5t55.5-273.5t150-225t225-150t273.5-55.5t273.5 55.5t225 150t150 225t55.5 273.5q0 220-124 399l343 343q37 37 37 90";
+const SEARCH_VIEW_BOX = "0 0 1664 1664";
 
 export default function ZoomSlider({
   device,
@@ -91,7 +98,12 @@ export default function ZoomSlider({
   useEffect(() => {
     if (isFirstMount.current) {
       // Position the thumb at the starting zoom value on first mount.
-      translateX.value = zoomToTranslate(initialZoom ?? minZoom, minZoom, range, maxTranslate);
+      translateX.value = zoomToTranslate(
+        initialZoom ?? minZoom,
+        minZoom,
+        range,
+        maxTranslate,
+      );
       isFirstMount.current = false;
       return;
     }
@@ -99,7 +111,6 @@ export default function ZoomSlider({
     translateX.value = 0;
     contextX.value = 0;
     lastUpdate.value = 0;
-
   }, [resetKey]);
 
   // Keep the thumb showing the same zoom ratio when the track is resized
@@ -167,7 +178,10 @@ export default function ZoomSlider({
 
   // The gesture detector listens for the user's drag, while the animated views display it.
   return (
-    <View style={[styles.wrapper, { right: rightOffset }]} pointerEvents="box-none">
+    <View
+      style={[styles.wrapper, { right: rightOffset }]}
+      pointerEvents="box-none"
+    >
       {/* Reset the zoom back to its starting position when tapped. */}
       <TouchableOpacity
         style={styles.iconButton}
@@ -196,11 +210,11 @@ export default function ZoomSlider({
 
 const styles = StyleSheet.create({
   wrapper: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 33,
     right: RIGHT_OFFSET_MAX,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: WRAPPER_GAP,
     zIndex: 10,
   },
@@ -209,35 +223,35 @@ const styles = StyleSheet.create({
   iconButton: {
     width: ICON_WIDTH,
     height: ICON_WIDTH,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   track: {
     width: TRACK_WIDTH,
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: "rgba(255,255,255,0.3)",
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
+    borderColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
   },
   fill: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.7)',
+    borderColor: "rgba(0,0,0,0.7)",
   },
   thumb: {
-    position: 'absolute',
+    position: "absolute",
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.7)',
+    borderColor: "rgba(0,0,0,0.7)",
     left: 0,
   },
 });

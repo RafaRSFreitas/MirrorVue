@@ -1,23 +1,22 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, AppState } from 'react-native';
-import { SystemBars } from 'react-native-edge-to-edge';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  activateKeepAwakeAsync,
-  deactivateKeepAwake,
-} from 'expo-keep-awake';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import CameraView from './src/components/CameraView';
-import { STORAGE_KEYS } from './src/storageKeys';
+import React, { useEffect } from "react";
+import { View, StyleSheet, AppState } from "react-native";
+import { SystemBars } from "react-native-edge-to-edge";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import CameraView from "./src/components/CameraView";
+import { STORAGE_KEYS } from "./src/storageKeys";
 
 export default function App() {
   // Apply the saved Keep screen awake preference when the app is active.
   const applyKeepAwakeSetting = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.keepScreenAwake);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.keepScreenAwake,
+      );
 
       // Keep the screen awake by default unless the user explicitly disabled it.
-      const keepScreenAwake = savedValue === null || savedValue === 'true';
+      const keepScreenAwake = savedValue === null || savedValue === "true";
 
       if (keepScreenAwake) {
         await activateKeepAwakeAsync();
@@ -37,8 +36,8 @@ export default function App() {
     applyKeepAwakeSetting();
 
     // Reapply the saved preference whenever the app returns to the foreground.
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active') {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
         applyKeepAwakeSetting();
       } else {
         // Always allow the screen to sleep normally while the app is backgrounded.
@@ -71,4 +70,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

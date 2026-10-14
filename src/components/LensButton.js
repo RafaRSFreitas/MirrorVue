@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from '../storageKeys';
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { STORAGE_KEYS } from "../storageKeys";
 
-export default function LensButton({ frontDevices, selectedLensId, controlsVisible, onLensChange }) {
+export default function LensButton({
+  frontDevices,
+  selectedLensId,
+  controlsVisible,
+  onLensChange,
+}) {
   // Load the previously selected lens, if any, once the available lenses are known.
   useEffect(() => {
     if (frontDevices.length > 0) {
@@ -38,18 +43,18 @@ export default function LensButton({ frontDevices, selectedLensId, controlsVisib
 
 const styles = StyleSheet.create({
   button: {
-    position: 'absolute',
-    top:  40,
+    position: "absolute",
+    top: 40,
     left: 80,
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(82, 82, 82, 0.37)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(82, 82, 82, 0.37)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   label: {
-    color: 'white',
+    color: "white",
     fontSize: 22,
   },
 });

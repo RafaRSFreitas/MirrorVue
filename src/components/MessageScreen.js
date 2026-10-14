@@ -1,5 +1,5 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 // A simple full-screen message used when the camera cannot be shown.
 // The parent owns the camera and permission logic; this component only renders it.
@@ -44,28 +44,28 @@ export default function MessageScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   panel: {
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
-    color: 'white',
+    color: "white",
     fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 12,
   },
   message: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
     lineHeight: 23,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 24,
   },
   primaryButton: {
@@ -73,26 +73,26 @@ const styles = StyleSheet.create({
     minWidth: 180,
     paddingHorizontal: 20,
     borderRadius: 8,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 8,
   },
   primaryButtonText: {
-    color: 'black',
+    color: "black",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   secondaryButton: {
     minHeight: 48,
     minWidth: 180,
     paddingHorizontal: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   secondaryButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
 });

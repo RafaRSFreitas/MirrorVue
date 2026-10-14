@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   StyleSheet,
   View,
@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-} from 'react-native';
+} from "react-native";
 
 // Shared modal scaffolding used by the About, Settings, and Donation panels:
 // a full-screen dimmed overlay, a centered card with a fixed title, a close
@@ -48,7 +48,9 @@ export default function ModalShell({
             onPress={onClose}
             activeOpacity={0.7}
           >
-            <Text style={[styles.closeText, { fontSize: closeTextSize }]}>✕</Text>
+            <Text style={[styles.closeText, { fontSize: closeTextSize }]}>
+              ✕
+            </Text>
           </TouchableOpacity>
 
           <ScrollView
@@ -68,9 +70,9 @@ const styles = StyleSheet.create({
   // Cover the entire preview and center the card in both directions.
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
 
@@ -79,13 +81,13 @@ const styles = StyleSheet.create({
 
   // Keep the panel content inside a centered readable card.
   panel: {
-    width: '90%',
+    width: "90%",
     maxWidth: 400,
-    backgroundColor: 'rgba(0,0,0,0.88)',
+    backgroundColor: "rgba(0,0,0,0.88)",
     borderRadius: 12,
     padding: 24,
-    position: 'relative',
-    maxHeight: '90%',
+    position: "relative",
+    maxHeight: "90%",
     flexShrink: 1,
     zIndex: 1,
     elevation: 1,
@@ -110,26 +112,26 @@ const styles = StyleSheet.create({
 
   // Place the close button in the upper-right corner of the panel.
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     width: 48,
     height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 30,
     elevation: 30,
   },
 
   // Use a simple close symbol rather than adding another icon dependency.
   closeText: {
-    color: 'white',
+    color: "white",
   },
 
   // Make the panel heading clearly visible.
   title: {
-    color: 'white',
+    color: "white",
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

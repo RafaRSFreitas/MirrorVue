@@ -1,7 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, useWindowDimensions, AppState } from 'react-native';
-import { FontAwesome } from '@react-native-vector-icons/fontawesome/static';
-import * as Brightness from 'expo-brightness';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+  AppState,
+} from "react-native";
+import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
+import * as Brightness from "expo-brightness";
 
 // Thickness of the white frame that lights up around the screen edges.
 const FRAME_THICKNESS = 100;
@@ -14,10 +20,16 @@ const OVERLAY_HIDE_DELAY = 500;
 //   flash (right 82 + 50) + eye (right 20 + 50) -> right side starts at width - 132
 // Four icons fit, with a small gap, once width - 132 >= 130 + 12, i.e. width >= 274.
 // On anything narrower the flash icon would land on top of the lens icon, so it is
-// hidden. 
+// hidden.
 export const FLASH_MIN_WIDTH = 274;
 
-export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlashChange, visible = true }) {
+export default function FlashButton({
+  controlsVisible,
+  isFrozen,
+  lensId,
+  onFlashChange,
+  visible = true,
+}) {
   // Track whether the virtual front flash is currently on.
   const [isOn, setIsOn] = useState(false);
 
@@ -77,8 +89,8 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlash
   // Turn the flash off whenever the app leaves the foreground, so the forced maximum
   // brightness is never left stuck on while the screen is off or the app is hidden.
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState !== 'active') {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState !== "active") {
         setIsOn(false);
         setIsOverlayHidden(false);
       }
@@ -103,7 +115,10 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlash
 
     if (!isOn) return undefined;
 
-    const timer = setTimeout(() => setIsOverlayHidden(true), OVERLAY_HIDE_DELAY);
+    const timer = setTimeout(
+      () => setIsOverlayHidden(true),
+      OVERLAY_HIDE_DELAY,
+    );
     return () => clearTimeout(timer);
   }, [isFrozen]);
 
@@ -145,7 +160,7 @@ export default function FlashButton({ controlsVisible, isFrozen, lensId, onFlash
           <FontAwesome
             name="flash"
             size={23}
-            color={isOn ? '#FFD54A' : 'white'}
+            color={isOn ? "#FFD54A" : "white"}
           />
         </TouchableOpacity>
       )}
@@ -158,45 +173,45 @@ const styles = StyleSheet.create({
   // reliably no matter how the camera affects the parent layout. The thickness is
   // fixed, while the length is supplied at render time from the screen dimensions.
   topBar: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     height: FRAME_THICKNESS,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   bottomBar: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     height: FRAME_THICKNESS,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   leftBar: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
     width: FRAME_THICKNESS,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   rightBar: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
     width: FRAME_THICKNESS,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
 
   // Place the flash button just to the left of the eye button.
   button: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     right: 82,
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(82, 82, 82, 0.37)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(82, 82, 82, 0.37)",
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 20,
     elevation: 20,
   },

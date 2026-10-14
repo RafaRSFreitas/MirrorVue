@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import { useIAP, ErrorCode } from 'expo-iap';
-import ModalShell from './ModalShell';
+} from "react-native";
+import { useIAP, ErrorCode } from "expo-iap";
+import ModalShell from "./ModalShell";
 
 // These are the four fixed Google Play product IDs defined for MirrorVue.
 // Prices are intentionally not stored here because Google Play provides localized prices at runtime.
 const DONATION_PRODUCT_IDS = [
-  'donation_1',
-  'donation_2',
-  'donation_3',
-  'donation_4',
+  "donation_1",
+  "donation_2",
+  "donation_3",
+  "donation_4",
 ];
 
 export default function DonationPanel({ visible = true, onClose }) {
@@ -23,7 +23,7 @@ export default function DonationPanel({ visible = true, onClose }) {
   const [purchasingProductId, setPurchasingProductId] = useState(null);
 
   // Display a simple status message for loading, unavailable, pending, or billing errors.
-  const [statusMessage, setStatusMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState("");
 
   // useIAP manages the Google Play connection and purchase listeners for this component.
   const {
@@ -36,9 +36,11 @@ export default function DonationPanel({ visible = true, onClose }) {
     // Handle a successfully completed purchase.
     onPurchaseSuccess: async (purchase) => {
       // A purchase may report a pending state while Google Play is still processing payment.
-      if (purchase.purchaseState === 'pending') {
+      if (purchase.purchaseState === "pending") {
         setPurchasingProductId(null);
-        setStatusMessage('Your donation is still being processed by Google Play.');
+        setStatusMessage(
+          "Your donation is still being processed by Google Play.",
+        );
         return;
       }
 
@@ -50,11 +52,13 @@ export default function DonationPanel({ visible = true, onClose }) {
         });
 
         setPurchasingProductId(null);
-        setStatusMessage('Thank you for supporting MirrorVue!');
+        setStatusMessage("Thank you for supporting MirrorVue!");
       } catch (error) {
         // Keep the donation panel usable even if transaction finalization fails.
         setPurchasingProductId(null);
-        setStatusMessage('The purchase was completed, but it could not be finalized yet.');
+        setStatusMessage(
+          "The purchase was completed, but it could not be finalized yet.",
+        );
       }
     },
 
@@ -64,12 +68,12 @@ export default function DonationPanel({ visible = true, onClose }) {
 
       // Closing the Google Play purchase window is not a real error from the user's perspective.
       if (error.code === ErrorCode.UserCancelled) {
-        setStatusMessage('');
+        setStatusMessage("");
         return;
       }
 
       // Show the billing error without blocking access to the mirror.
-      setStatusMessage(error.message || 'The donation could not be completed.');
+      setStatusMessage(error.message || "The donation could not be completed.");
     },
   });
 
@@ -79,14 +83,16 @@ export default function DonationPanel({ visible = true, onClose }) {
       return;
     }
 
-    setStatusMessage('');
+    setStatusMessage("");
 
     fetchProducts({
       skus: DONATION_PRODUCT_IDS,
-      type: 'in-app',
+      type: "in-app",
     }).catch((error) => {
       // Explain that the donation service is unavailable while leaving the core mirror unaffected.
-      setStatusMessage('Donations are temporarily unavailable. Please try again later.');
+      setStatusMessage(
+        "Donations are temporarily unavailable. Please try again later.",
+      );
     });
   }, [connected, fetchProducts]);
 
@@ -100,7 +106,7 @@ export default function DonationPanel({ visible = true, onClose }) {
     }
 
     setPurchasingProductId(productId);
-    setStatusMessage('');
+    setStatusMessage("");
 
     try {
       // The product is an in-app consumable, so Google Play opens its normal purchase UI.
@@ -110,12 +116,12 @@ export default function DonationPanel({ visible = true, onClose }) {
             skus: [productId],
           },
         },
-        type: 'in-app',
+        type: "in-app",
       });
     } catch (error) {
       // requestPurchase can fail before the purchase callback is reached.
       setPurchasingProductId(null);
-      setStatusMessage(error.message || 'Unable to start the donation.');
+      setStatusMessage(error.message || "Unable to start the donation.");
     }
   };
 
@@ -135,7 +141,8 @@ export default function DonationPanel({ visible = true, onClose }) {
         MirrorVue is free, with no ads, and fully functional for everyone!
       </Text>
       <Text style={styles.description}>
-        If you find the app useful, you can support the development through a voluntary donation.
+        If you find the app useful, you can support the development through a
+        voluntary donation.
       </Text>
 
       {/* Show a loading message while the Google Play connection is being established. */}
@@ -188,14 +195,14 @@ export default function DonationPanel({ visible = true, onClose }) {
 const styles = StyleSheet.create({
   // Keep the donation choices inside a compact readable panel.
   panel: {
-    width: '100%',
+    width: "100%",
     maxWidth: 420,
     borderRadius: 12,
   },
 
   // Explain the purpose of the panel without adding unnecessary instructions.
   description: {
-    color: 'white',
+    color: "white",
     fontSize: 15,
     lineHeight: 21,
     marginBottom: 18,
@@ -210,37 +217,37 @@ const styles = StyleSheet.create({
   productButton: {
     minHeight: 60,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: "rgba(255,255,255,0.15)",
     paddingHorizontal: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
 
   // Display the localized Google Play product name prominently.
   productTitle: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   // Display the localized Google Play price without hard-coding any currency.
   productPrice: {
-    color: 'white',
+    color: "white",
     fontSize: 15,
     marginTop: 4,
   },
 
   // Center loading information while Google Play is connecting.
   statusContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 12,
   },
 
   // Display billing status information clearly without blocking the rest of the app.
   statusText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
     lineHeight: 20,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 14,
   },
 });

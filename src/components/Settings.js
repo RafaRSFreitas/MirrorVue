@@ -1,19 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Switch,
-  AppState,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import {
-  activateKeepAwakeAsync,
-  deactivateKeepAwake,
-} from 'expo-keep-awake';
-import ModalShell from './ModalShell';
-import { STORAGE_KEYS } from '../storageKeys';
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, Text, Switch, AppState } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import ModalShell from "./ModalShell";
+import { STORAGE_KEYS } from "../storageKeys";
 
 // These are the default values.
 const DEFAULT_SETTINGS = {
@@ -24,12 +15,12 @@ const DEFAULT_SETTINGS = {
 export default function Settings({ visible, onClose }) {
   // Track whether landscape mode is enabled.
   const [allowLandscape, setAllowLandscape] = useState(
-    DEFAULT_SETTINGS.allowLandscape
+    DEFAULT_SETTINGS.allowLandscape,
   );
 
   // Track whether the screen should remain awake while the app is in the foreground.
   const [keepScreenAwake, setKeepScreenAwake] = useState(
-    DEFAULT_SETTINGS.keepScreenAwake
+    DEFAULT_SETTINGS.keepScreenAwake,
   );
 
   // Load all saved Settings once the component is mounted.
@@ -37,23 +28,23 @@ export default function Settings({ visible, onClose }) {
     const loadSettings = async () => {
       try {
         const savedAllowLandscape = await AsyncStorage.getItem(
-          STORAGE_KEYS.allowLandscapeMode
+          STORAGE_KEYS.allowLandscapeMode,
         );
 
         const savedKeepScreenAwake = await AsyncStorage.getItem(
-          STORAGE_KEYS.keepScreenAwake
+          STORAGE_KEYS.keepScreenAwake,
         );
 
         setAllowLandscape(
           savedAllowLandscape === null
             ? DEFAULT_SETTINGS.allowLandscape
-            : savedAllowLandscape === 'true'
+            : savedAllowLandscape === "true",
         );
 
         setKeepScreenAwake(
           savedKeepScreenAwake === null
             ? DEFAULT_SETTINGS.keepScreenAwake
-            : savedKeepScreenAwake === 'true'
+            : savedKeepScreenAwake === "true",
         );
       } catch (error) {
         // Keep the default Settings if stored values cannot be loaded.
@@ -69,37 +60,35 @@ export default function Settings({ visible, onClose }) {
       if (!allowLandscape) {
         // Keep the application locked to portrait when landscape mode is disabled.
         await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
         );
         return;
       }
 
       try {
         // Allow the operating system to rotate through portrait and landscape.
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.ALL,
+        );
       } catch (error) {
         // Fall back to portrait if the orientation policy cannot be unlocked.
         await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
         );
       }
     };
 
     startOrientationHandling();
-
   }, [allowLandscape]);
 
   // Stop the orientation sensor while the app is backgrounded to avoid unnecessary sensor use.
   useEffect(() => {
-    const subscription = AppState.addEventListener(
-      'change',
-      (nextAppState) => {
-        if (nextAppState === 'active' && allowLandscape) {
-          // Reapply the all-orientations policy after returning to the foreground.
-          ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
-        }
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active" && allowLandscape) {
+        // Reapply the all-orientations policy after returning to the foreground.
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
       }
-    );
+    });
 
     return () => subscription.remove();
   }, [allowLandscape]);
@@ -108,20 +97,14 @@ export default function Settings({ visible, onClose }) {
   const toggleLandscape = async (value) => {
     setAllowLandscape(value);
 
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.allowLandscapeMode,
-      String(value)
-    );
+    await AsyncStorage.setItem(STORAGE_KEYS.allowLandscapeMode, String(value));
   };
 
   // Save and immediately apply the keep-screen-awake preference.
   const toggleKeepScreenAwake = async (value) => {
     setKeepScreenAwake(value);
 
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.keepScreenAwake,
-      String(value)
-    );
+    await AsyncStorage.setItem(STORAGE_KEYS.keepScreenAwake, String(value));
 
     if (value) {
       // Keep the screen awake immediately after the user enables the setting.
@@ -148,10 +131,7 @@ export default function Settings({ visible, onClose }) {
           </Text>
         </View>
 
-        <Switch
-          value={allowLandscape}
-          onValueChange={toggleLandscape}
-        />
+        <Switch value={allowLandscape} onValueChange={toggleLandscape} />
       </View>
 
       {/* Allow the user to disable the keep-screen-awake behavior. */}
@@ -159,15 +139,12 @@ export default function Settings({ visible, onClose }) {
         <View style={styles.settingTextContainer}>
           <Text style={styles.settingTitle}>Keep screen awake</Text>
           <Text style={styles.settingDescription}>
-            Prevent the screen from dimming or sleeping while MirrorVue
-            is in the foreground.
+            Prevent the screen from dimming or sleeping while MirrorVue is in
+            the foreground.
           </Text>
         </View>
 
-        <Switch
-          value={keepScreenAwake}
-          onValueChange={toggleKeepScreenAwake}
-        />
+        <Switch value={keepScreenAwake} onValueChange={toggleKeepScreenAwake} />
       </View>
     </ModalShell>
   );
@@ -176,7 +153,7 @@ export default function Settings({ visible, onClose }) {
 const styles = StyleSheet.create({
   // Keep the Settings content in a large readable panel over the mirror.
   panel: {
-    width: '100%',
+    width: "100%",
     maxWidth: 500,
     borderRadius: 16,
   },
@@ -184,11 +161,11 @@ const styles = StyleSheet.create({
   // Lay out each setting as a label on the left and a switch on the right.
   settingRow: {
     minHeight: 72,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.12)',
+    borderBottomColor: "rgba(255,255,255,0.12)",
     paddingVertical: 12,
   },
 
@@ -200,14 +177,14 @@ const styles = StyleSheet.create({
 
   // Display the name of each setting clearly.
   settingTitle: {
-    color: 'white',
+    color: "white",
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   // Explain briefly what each setting controls.
   settingDescription: {
-    color: 'rgba(255,255,255,0.75)',
+    color: "rgba(255,255,255,0.75)",
     fontSize: 14,
     lineHeight: 20,
     marginTop: 4,

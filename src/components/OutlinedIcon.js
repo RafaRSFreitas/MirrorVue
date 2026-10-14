@@ -1,10 +1,17 @@
-import React from 'react';
-import Svg, { Path } from 'react-native-svg';
+import React from "react";
+import Svg, { Path } from "react-native-svg";
 
 // Renders an icon glyph with a stroke that follows the icon's own shape,
 // instead of a plain circle around it.
-export default function OutlinedIcon({ d, viewBox, size = 17, fill, stroke, strokeWidth = 1.4 }) {
-  const parts = viewBox.split(' ').map(Number);
+export default function OutlinedIcon({
+  d,
+  viewBox,
+  size = 17,
+  fill,
+  stroke,
+  strokeWidth = 1.4,
+}) {
+  const parts = viewBox.split(" ").map(Number);
   const vbW = parts[2];
   const vbH = parts[3];
 
