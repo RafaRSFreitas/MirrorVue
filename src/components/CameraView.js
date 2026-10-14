@@ -14,6 +14,7 @@ import Menu from "./Menu";
 import EyeButton from "./EyeButton";
 import FlashButton, { FLASH_MIN_WIDTH } from "./FlashButton";
 import MessageScreen from "./MessageScreen";
+import { STORAGE_KEYS, loadSetting, saveSetting } from '../storage';
 
 // Ignore these harmless messages that can appear when the camera receives rapid zoom updates.
 LogBox.ignoreLogs([
@@ -31,8 +32,23 @@ export default function CameraView() {
 
   // Use the lens picked by LensButton, falling back to the first one found.
   const [selectedLensId, setSelectedLensId] = useState(null);
-  const device =
-    frontDevices.find((d) => d.id === selectedLensId) ?? frontDevices[0];
+  const device = frontDevices.find((d) => d.id === selectedLensId) ?? frontDevices[0];
+
+  // Once the front cameras are known, select the lens the user picked last time.
+  useEffect(() => {
+    if (frontDevices.length === 0) return;
+
+    loadSetting(STORAGE_KEYS.selectedLensId, null).then((savedId) => {
+      const match = frontDevices.find((d) => d.id === savedId);
+      setSelectedLensId(match ? match.id : frontDevices[0].id);
+    });
+  }, [frontDevices.length]);
+
+  // Select a lens and remember the choice for the next launch.
+  const handleLensChange = (lensId) => {
+    setSelectedLensId(lensId);
+    saveSetting(STORAGE_KEYS.selectedLensId, lensId);
+  };
 
   // A reference to the Camera component, needed by FreezeButton to call takeSnapshot().
   const camera = useRef(null);
@@ -333,8 +349,7 @@ export default function CameraView() {
         <LensButton
           frontDevices={frontDevices}
           selectedLensId={selectedLensId}
-          controlsVisible={controlsVisible}
-          onLensChange={setSelectedLensId}
+          onLensChange={handleLensChange}
         />
       )}
 
