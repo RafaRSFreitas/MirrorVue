@@ -6,7 +6,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { useIAP, ErrorCode } from "expo-iap";
+import {
+  useIAP,
+  ErrorCode,
+  getAvailablePurchases as getStorePurchases,
+} from "expo-iap";
 import ModalShell from "./ModalShell";
 
 // These are the four fixed Google Play product IDs defined for MirrorVue.
@@ -32,7 +36,15 @@ export default function DonationPanel({ visible = true, onClose }) {
     fetchProducts,
     requestPurchase,
     finishTransaction,
+    reconnect,
   } = useIAP({
+    // Report a failure of the Google Play connection, so the panel can explain that
+    // donations are temporarily unavailable instead of waiting forever.
+    onError: () => {
+      setStatusMessage(
+        "Donations are temporarily unavailable. Please try again later.",
+      );
+    },
     // Handle a successfully completed purchase.
     onPurchaseSuccess: async (purchase) => {
       // A purchase may report a pending state while Google Play is still processing payment.
@@ -41,6 +53,13 @@ export default function DonationPanel({ visible = true, onClose }) {
         setStatusMessage(
           "Your donation is still being processed by Google Play.",
         );
+        return;
+      }
+
+      // Only a confirmed purchase may be finalized and thanked.
+      if (purchase.purchaseState !== "purchased") {
+        setPurchasingProductId(null);
+        setStatusMessage("The donation could not be confirmed.");
         return;
       }
 
@@ -72,6 +91,14 @@ export default function DonationPanel({ visible = true, onClose }) {
         return;
       }
 
+      // A purchase that is still waiting for its payment method is not a failure either.
+      if (error.code === ErrorCode.Pending) {
+        setStatusMessage(
+          "Your donation is still being processed by Google Play.",
+        );
+        return;
+      }
+
       // Show the billing error without blocking access to the mirror.
       setStatusMessage(error.message || "The donation could not be completed.");
     },
@@ -94,7 +121,39 @@ export default function DonationPanel({ visible = true, onClose }) {
         "Donations are temporarily unavailable. Please try again later.",
       );
     });
-  }, [connected, fetchProducts]);
+
+    // Finish any purchase that was not consumed before, for example when the app was
+    // closed right after the payment. Without this, the same donation could not be
+    // bought a second time, because Google Play still considers it owned.
+    getStorePurchases()
+      .then(async (purchases) => {
+        for (const purchase of purchases) {
+          if (!DONATION_PRODUCT_IDS.includes(purchase.productId)) {
+            continue;
+          }
+          // Pending purchases must be left untouched until Google Play completes them.
+          if (purchase.purchaseState !== "purchased") {
+            continue;
+          }
+          try {
+            await finishTransaction({ purchase, isConsumable: true });
+          } catch (error) {
+            // Keep processing the remaining purchases when one cannot be finalized.
+            console.warn(
+              "Mirror Vue donation recovery error:",
+              error?.message ?? error,
+            );
+          }
+        }
+      })
+      .catch((error) => {
+        // A purchase that cannot be read is not fatal for the panel.
+        console.warn(
+          "Mirror Vue donation recovery error:",
+          error?.message ?? error,
+        );
+      });
+  }, [connected, fetchProducts, finishTransaction]);
 
   // Find the product currently being purchased so its button can show a loading state.
   const isPurchasing = (productId) => purchasingProductId === productId;
@@ -125,6 +184,19 @@ export default function DonationPanel({ visible = true, onClose }) {
     }
   };
 
+  // Try to reach Google Play again, after a failed attempt.
+  const handleRetryConnection = async () => {
+    setStatusMessage("");
+
+    const didConnect = await reconnect();
+
+    if (!didConnect) {
+      setStatusMessage(
+        "Donations are temporarily unavailable. Please try again later.",
+      );
+    }
+  };
+
   // Menu only mounts this panel while it is open, so it defaults to visible
   // and renders nothing only when explicitly closed through the visible prop.
   if (!visible) return null;
@@ -151,6 +223,17 @@ export default function DonationPanel({ visible = true, onClose }) {
           <ActivityIndicator />
           <Text style={styles.statusText}>Connecting to Google Play...</Text>
         </View>
+      )}
+
+      {/* Let the user try again when Google Play could not be reached. */}
+      {!connected && !!statusMessage && (
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={handleRetryConnection}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.retryText}>Try again</Text>
+        </TouchableOpacity>
       )}
 
       {/* Display each product exactly as returned by Google Play. */}
@@ -249,5 +332,22 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: "center",
     marginTop: 14,
+  },
+
+  // Give the retry button a large, accessible touch target.
+  retryButton: {
+    minHeight: 48,
+    borderRadius: 8,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 14,
+  },
+
+  // Display the retry label clearly.
+  retryText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });
