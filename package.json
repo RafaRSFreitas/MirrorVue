@@ -23,12 +23,15 @@
     "react-native-vision-camera": "^5.2.3"
   },
   "scripts": {
+    "icons": "node scripts/generate-icons.js",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
   "private": true,
   "devDependencies": {
+    "jimp-compact": "0.16.1",
+    "pngjs": "3.4.0",
     "prettier": "^3.9.10"
   }
 }

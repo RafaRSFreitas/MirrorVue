@@ -1,14 +1,9 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, Pressable } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome } from "@react-native-vector-icons/fontawesome/static";
 import { SCREEN_MARGIN, TOP_ROW_TOP, controlButtonStyle } from '../constants';
 
 export default function EyeButton({ controlsVisible, onVisibilityChange }) {
-  // Show the controls when the user taps the preview.
-  const showControls = () => {
-    onVisibilityChange(true);
-  };
-
   // Hide or show the controls when the eye is pressed.
   const toggleVisibility = () => {
     onVisibilityChange(!controlsVisible);
@@ -16,9 +11,6 @@ export default function EyeButton({ controlsVisible, onVisibilityChange }) {
 
   return (
     <>
-      {/* Catch taps anywhere on the mirror preview and restore the controls.
-          This layer stays below the other controls so they remain interactive. */}
-      <Pressable style={styles.activityLayer} onPress={showControls} />
       {/* Keep the eye permanently visible in the top-right corner. */}
       <TouchableOpacity
         style={[controlButtonStyle, styles.button]}
@@ -37,12 +29,6 @@ export default function EyeButton({ controlsVisible, onVisibilityChange }) {
 }
 
 const styles = StyleSheet.create({
-  // Catch taps on the camera preview while remaining underneath the controls.
-  activityLayer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-  },
-
   // Keep the eye permanently in the top-right corner of the mirror preview.
   button: {
     position: "absolute",

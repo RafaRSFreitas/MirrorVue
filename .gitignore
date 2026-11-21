@@ -42,3 +42,6 @@ yarn-error.*
 
 # Personal notes
 Notes/
+
+# Generated APKs
+/releases/

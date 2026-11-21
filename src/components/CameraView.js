@@ -75,7 +75,7 @@ export default function CameraView() {
   const lastZoomRef = useRef(null);
 
   // Track whether the controls are currently visible.
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(false);
 
   // Track whether the virtual front flash is on, so the brightness slider can follow it.
   const [isFlashOn, setIsFlashOn] = useState(false);
