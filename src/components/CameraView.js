@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, View, LogBox, AppState, Linking } from "react-native";
+import { StyleSheet, View, LogBox, AppState, BackHandler, Linking } from "react-native";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import {
   Camera,
   useCameraPermission,
@@ -76,6 +77,21 @@ export default function CameraView() {
 
   // Track whether the controls are currently visible.
   const [controlsVisible, setControlsVisible] = useState(false);
+
+  // A double tap on the mirror shows or hides the controls, like the eye button.
+  const doubleTap = Gesture.Tap().numberOfTaps(2).runOnJS(true).onEnd(() => {
+    setControlsVisible((currentValue) => !currentValue);
+  });
+
+  // Return to the live preview when Back is pressed while the image is frozen.
+  useEffect(() => {
+    if (!isFrozen) return undefined;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      toggleFreeze();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [isFrozen]);
 
   // Track whether the virtual front flash is on, so the brightness slider can follow it.
   const [isFlashOn, setIsFlashOn] = useState(false);
@@ -235,6 +251,11 @@ export default function CameraView() {
 
       {/* Show the captured frame on top of the camera while frozen. */}
       {frozenUri !== null && <FrozenFrame uri={frozenUri} />}
+
+      {/* Listen for double taps on the image without covering the controls. */}
+      <GestureDetector gesture={doubleTap}>
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-only" />
+      </GestureDetector>
 
       {/* Let the user light their face with a virtual front flash. */}
       <FlashButton
