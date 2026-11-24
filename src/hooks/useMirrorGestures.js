@@ -4,13 +4,20 @@ import { runOnJS, useSharedValue } from "react-native-reanimated";
 // Ignore small movements while the user is still placing the second finger.
 const MIN_MOVEMENT = 8;
 
+// Give a single finger some room to land between taps.
+const DOUBLE_TAP_DISTANCE = 24;
+const DOUBLE_TAP_DELAY_MS = 350;
+
 export default function useMirrorGestures({
   enabled, height, minZoom, maxZoom, zoom, updateZoom, brightness, updateBrightness, onDoubleTap,
 }) {
   const start = useSharedValue(null);
   const activeSlider = useSharedValue(null);
 
-  const doubleTap = Gesture.Tap().numberOfTaps(2).maxDistance(MIN_MOVEMENT)
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .maxDistance(DOUBLE_TAP_DISTANCE)
+    .maxDelay(DOUBLE_TAP_DELAY_MS)
     .onTouchesDown((event, manager) => {
       if (event.numberOfTouches > 1) manager.fail();
     })

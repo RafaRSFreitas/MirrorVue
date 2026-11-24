@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const STORAGE_KEYS = {
   selectedLensId: 'selectedLensId',
   controlsVisible: 'controlsVisible',
+  language: 'language',
   keepScreenAwake: 'keepScreenAwake',
   allowLandscapeMode: 'allowLandscapeMode',
 };
@@ -13,6 +14,7 @@ export const STORAGE_KEYS = {
 // The names must match the ones in STORAGE_KEYS.
 export const DEFAULT_SETTINGS = {
   controlsVisible: false,
+  language: 'en',
   keepScreenAwake: true,
   allowLandscapeMode: false,
 };

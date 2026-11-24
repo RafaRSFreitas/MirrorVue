@@ -1,20 +1,21 @@
 import React from 'react';
-import { StyleSheet, View, Text, Switch } from 'react-native';
+import { StyleSheet, View, Text, Switch, TouchableOpacity } from 'react-native';
 import ModalShell from './ModalShell';
 import { useSettings } from '../SettingsContext';
+import { languageCodes, translations } from '../locales';
 
 export default function Settings({ visible, onClose }) {
   // The settings live in SettingsProvider, so this panel only shows them and asks to change them.
-  const { settings, updateSetting } = useSettings();
+  const { settings, updateSetting, strings } = useSettings();
 
   return (
-    <ModalShell visible={visible} title="Settings" onClose={onClose} panelStyle={styles.panel}>
+    <ModalShell visible={visible} title={strings.menu.settings} onClose={onClose} panelStyle={styles.panel}>
       {/* Allow the user to enable portrait and landscape orientation changes. */}
       <View style={styles.settingRow}>
         <View style={styles.settingTextContainer}>
-          <Text style={styles.settingTitle}>Allow landscape mode</Text>
+          <Text style={styles.settingTitle}>{strings.settings.allowLandscape}</Text>
           <Text style={styles.settingDescription}>
-            Allow the interface to rotate when the device is turned.
+            {strings.settings.landscapeDescription}
           </Text>
         </View>
 
@@ -27,9 +28,9 @@ export default function Settings({ visible, onClose }) {
       {/* Allow the user to disable the keep-screen-awake behavior. */}
       <View style={styles.settingRow}>
         <View style={styles.settingTextContainer}>
-          <Text style={styles.settingTitle}>Keep screen awake</Text>
+          <Text style={styles.settingTitle}>{strings.settings.keepAwake}</Text>
           <Text style={styles.settingDescription}>
-            Prevent the screen from dimming or sleeping while MirrorVue is in the foreground.
+            {strings.settings.awakeDescription}
           </Text>
         </View>
 
@@ -37,6 +38,23 @@ export default function Settings({ visible, onClose }) {
           value={settings.keepScreenAwake}
           onValueChange={(value) => updateSetting('keepScreenAwake', value)}
         />
+      </View>
+
+      {/* Keep each language recognizable even when another language is selected. */}
+      <View style={styles.languageGroup} accessibilityRole="radiogroup">
+        <Text style={styles.settingTitle}>{strings.settings.language}</Text>
+        {languageCodes.map((code) => (
+          <TouchableOpacity
+            key={code}
+            style={styles.languageOption}
+            onPress={() => updateSetting('language', code)}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: settings.language === code }}
+          >
+            <Text style={styles.languageName}>{translations[code].languageName}</Text>
+            {settings.language === code && <Text accessible={false} style={styles.settingTitle}>✓</Text>}
+          </TouchableOpacity>
+        ))}
       </View>
     </ModalShell>
   );
@@ -80,5 +98,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginTop: 4,
+  },
+
+  languageGroup: {
+    paddingTop: 16,
+  },
+  languageOption: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  languageName: {
+    color: "white",
+    fontSize: 16,
+    flexShrink: 1,
   },
 });

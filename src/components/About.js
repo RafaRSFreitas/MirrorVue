@@ -2,28 +2,29 @@ import React from "react";
 import { StyleSheet, Text } from "react-native";
 import appConfig from '../../app.json';
 import ModalShell from "./ModalShell";
+import { useSettings } from "../SettingsContext";
 
 const APP_VERSION = appConfig.expo.version;
 
 export default function About({ visible, onClose }) {
+  const { strings } = useSettings();
+
   return (
     <ModalShell visible={visible} title="MirrorVue" onClose={onClose}>
       {/* Display the current application version. */}
-      <Text style={styles.text}>Version {APP_VERSION}</Text>
+      <Text style={styles.text}>{strings.about.version} {APP_VERSION}</Text>
 
       {/* Identify the developer responsible for the application. */}
-      <Text style={styles.text}>Developer: Rafael R. S. Freitas</Text>
+      <Text style={styles.text}>{strings.about.developer} Rafael R. S. Freitas</Text>
 
       {/* Briefly describe the purpose of the application. */}
       <Text style={styles.description}>
-        MirrorVue turns your Android device into a fullscreen digital mirror
-        using the front-facing camera.
+        {strings.about.description}
       </Text>
 
       {/* Explain the privacy behavior required by the product requirements. */}
       <Text style={styles.description}>
-        Privacy: the camera preview is displayed locally. MirrorVue does not
-        upload or transmit your image or video.
+        {strings.about.privacy}
       </Text>
     </ModalShell>
   );

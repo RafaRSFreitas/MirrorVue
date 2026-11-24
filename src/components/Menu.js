@@ -10,6 +10,7 @@ import About from "./About";
 import DonationPanel from "./DonationPanel";
 import Settings from "./Settings";
 import ModalShell from "./ModalShell";
+import { useSettings } from "../SettingsContext";
 import {
   CONTROL_BACKGROUND,
   CONTROL_SIZE,
@@ -19,6 +20,8 @@ import {
 } from "../constants";
 
 export default function Menu() {
+  const { strings } = useSettings();
+
   // Track whether the top-left menu dropdown is currently open.
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -94,7 +97,7 @@ export default function Menu() {
         >
           {/* Open the Settings panel. */}
           <TouchableOpacity style={styles.menuItem} onPress={openSettings}>
-            <Text style={styles.menuItemText}>Settings</Text>
+            <Text style={styles.menuItemText}>{strings.menu.settings}</Text>
           </TouchableOpacity>
 
           {/* Open the gesture instructions and close the dropdown. */}
@@ -102,17 +105,17 @@ export default function Menu() {
             setIsMenuOpen(false);
             setIsGesturesOpen(true);
           }}>
-            <Text style={styles.menuItemText}>Gestures</Text>
+            <Text style={styles.menuItemText}>{strings.menu.gestures}</Text>
           </TouchableOpacity>
 
           {/* Open the About information without leaving the mirror preview. */}
           <TouchableOpacity style={styles.menuItem} onPress={openAbout}>
-            <Text style={styles.menuItemText}>About</Text>
+            <Text style={styles.menuItemText}>{strings.menu.about}</Text>
           </TouchableOpacity>
 
           {/* Open the in-app DonationPanel without using an external browser page. */}
           <TouchableOpacity style={styles.menuItem} onPress={openDonation}>
-            <Text style={styles.menuItemText}>Buy me a coffee</Text>
+            <Text style={styles.menuItemText}>{strings.menu.donate}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -124,10 +127,10 @@ export default function Menu() {
       <Settings visible={isSettingsOpen} onClose={closeSettings} />
 
       {/* Explain the mirror gestures in the same panel used for the other menu options. */}
-      <ModalShell visible={isGesturesOpen} title="Gestures" onClose={() => setIsGesturesOpen(false)}>
-        <Text style={styles.instruction}>Double-tap the mirror to show or hide the controls.</Text>
-        <Text style={styles.instruction}>Spread two fingers apart on the live mirror to zoom in. Pinch them together to zoom out.</Text>
-        <Text style={styles.instruction}>Slide two fingers up together on the live mirror to brighten the screen, or down to dim it.</Text>
+      <ModalShell visible={isGesturesOpen} title={strings.menu.gestures} onClose={() => setIsGesturesOpen(false)}>
+        <Text style={styles.instruction}>{strings.gestures.doubleTap}</Text>
+        <Text style={styles.instruction}>{strings.gestures.zoom}</Text>
+        <Text style={styles.instruction}>{strings.gestures.brightness}</Text>
       </ModalShell>
 
       {/* Display the DonationPanel when the user chooses Buy me a coffee. */}

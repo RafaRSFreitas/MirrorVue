@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { DEFAULT_SETTINGS, loadSetting, saveSetting } from './storage';
+import { languageCodes, translations } from './locales';
 
 const SettingsContext = createContext(null);
 
@@ -28,7 +29,11 @@ export function SettingsProvider({ children }) {
         ])
       );
 
-      setSettings(Object.fromEntries(entries));
+      const savedSettings = Object.fromEntries(entries);
+      if (!languageCodes.includes(savedSettings.language)) {
+        savedSettings.language = DEFAULT_SETTINGS.language;
+      }
+      setSettings(savedSettings);
       setIsLoaded(true);
     };
 
@@ -100,7 +105,7 @@ export function SettingsProvider({ children }) {
   };
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSetting }}>
+    <SettingsContext.Provider value={{ settings, updateSetting, strings: translations[settings.language] }}>
       {/* Start the mirror with the saved controls already in the right state. */}
       {isLoaded && children}
     </SettingsContext.Provider>

@@ -12,6 +12,7 @@ import {
   getAvailablePurchases as getStorePurchases,
 } from "expo-iap";
 import ModalShell from "./ModalShell";
+import { useSettings } from "../SettingsContext";
 
 // These are the four fixed Google Play product IDs defined for MirrorVue.
 // Prices are intentionally not stored here because Google Play provides localized prices at runtime.
@@ -22,12 +23,33 @@ const DONATION_PRODUCT_IDS = [
   "donation_4",
 ];
 
+// Google Play can report the same billing error when starting a purchase or later in its callback.
+function purchaseStatus(error, fallback) {
+  switch (error?.code) {
+    case ErrorCode.UserCancelled:
+      return "";
+    case ErrorCode.Pending:
+    case ErrorCode.DeferredPayment:
+      return "pending";
+    case ErrorCode.NetworkError:
+      return "networkError";
+    case ErrorCode.BillingUnavailable:
+    case ErrorCode.ItemUnavailable:
+    case ErrorCode.ServiceDisconnected:
+      return "unavailable";
+    default:
+      return fallback;
+  }
+}
+
 export default function DonationPanel({ visible = true, onClose }) {
+  const { strings } = useSettings();
+
   // Track which donation option is currently being purchased.
   const [purchasingProductId, setPurchasingProductId] = useState(null);
 
-  // Display a simple status message for loading, unavailable, pending, or billing errors.
-  const [statusMessage, setStatusMessage] = useState("");
+  // Keep the message key so the panel always uses the current language.
+  const [status, setStatus] = useState("");
 
   // useIAP manages the Google Play connection and purchase listeners for this component.
   const {
@@ -41,25 +63,21 @@ export default function DonationPanel({ visible = true, onClose }) {
     // Report a failure of the Google Play connection, so the panel can explain that
     // donations are temporarily unavailable instead of waiting forever.
     onError: () => {
-      setStatusMessage(
-        "Donations are temporarily unavailable. Please try again later.",
-      );
+      setStatus("unavailable");
     },
     // Handle a successfully completed purchase.
     onPurchaseSuccess: async (purchase) => {
       // A purchase may report a pending state while Google Play is still processing payment.
       if (purchase.purchaseState === "pending") {
         setPurchasingProductId(null);
-        setStatusMessage(
-          "Your donation is still being processed by Google Play.",
-        );
+        setStatus("pending");
         return;
       }
 
       // Only a confirmed purchase may be finalized and thanked.
       if (purchase.purchaseState !== "purchased") {
         setPurchasingProductId(null);
-        setStatusMessage("The donation could not be confirmed.");
+        setStatus("unconfirmed");
         return;
       }
 
@@ -71,13 +89,11 @@ export default function DonationPanel({ visible = true, onClose }) {
         });
 
         setPurchasingProductId(null);
-        setStatusMessage("Thank you for supporting MirrorVue!");
+        setStatus("thanks");
       } catch (error) {
         // Keep the donation panel usable even if transaction finalization fails.
         setPurchasingProductId(null);
-        setStatusMessage(
-          "The purchase was completed, but it could not be finalized yet.",
-        );
+        setStatus("unfinished");
       }
     },
 
@@ -85,22 +101,7 @@ export default function DonationPanel({ visible = true, onClose }) {
     onPurchaseError: (error) => {
       setPurchasingProductId(null);
 
-      // Closing the Google Play purchase window is not a real error from the user's perspective.
-      if (error.code === ErrorCode.UserCancelled) {
-        setStatusMessage("");
-        return;
-      }
-
-      // A purchase that is still waiting for its payment method is not a failure either.
-      if (error.code === ErrorCode.Pending) {
-        setStatusMessage(
-          "Your donation is still being processed by Google Play.",
-        );
-        return;
-      }
-
-      // Show the billing error without blocking access to the mirror.
-      setStatusMessage(error.message || "The donation could not be completed.");
+      setStatus(purchaseStatus(error, "failed"));
     },
   });
 
@@ -110,16 +111,14 @@ export default function DonationPanel({ visible = true, onClose }) {
       return;
     }
 
-    setStatusMessage("");
+    setStatus("");
 
     fetchProducts({
       skus: DONATION_PRODUCT_IDS,
       type: "in-app",
     }).catch((error) => {
       // Explain that the donation service is unavailable while leaving the core mirror unaffected.
-      setStatusMessage(
-        "Donations are temporarily unavailable. Please try again later.",
-      );
+      setStatus("unavailable");
     });
 
     // Finish any purchase that was not consumed before, for example when the app was
@@ -165,7 +164,7 @@ export default function DonationPanel({ visible = true, onClose }) {
     }
 
     setPurchasingProductId(productId);
-    setStatusMessage("");
+    setStatus("");
 
     try {
       // The product is an in-app consumable, so Google Play opens its normal purchase UI.
@@ -180,20 +179,18 @@ export default function DonationPanel({ visible = true, onClose }) {
     } catch (error) {
       // requestPurchase can fail before the purchase callback is reached.
       setPurchasingProductId(null);
-      setStatusMessage(error.message || "Unable to start the donation.");
+      setStatus(purchaseStatus(error, "startFailed"));
     }
   };
 
   // Try to reach Google Play again, after a failed attempt.
   const handleRetryConnection = async () => {
-    setStatusMessage("");
+    setStatus("");
 
     const didConnect = await reconnect();
 
     if (!didConnect) {
-      setStatusMessage(
-        "Donations are temporarily unavailable. Please try again later.",
-      );
+      setStatus("unavailable");
     }
   };
 
@@ -204,35 +201,34 @@ export default function DonationPanel({ visible = true, onClose }) {
   return (
     <ModalShell
       visible
-      title="Buy me a coffee"
+      title={strings.menu.donate}
       onClose={onClose}
       panelStyle={styles.panel}
       closeTextSize={20}
     >
       <Text style={styles.description}>
-        MirrorVue is free, with no ads, and fully functional for everyone!
+        {strings.donation.intro}
       </Text>
       <Text style={styles.description}>
-        If you find the app useful, you can support the development through a
-        voluntary donation.
+        {strings.donation.support}
       </Text>
 
       {/* Show a loading message while the Google Play connection is being established. */}
-      {!connected && !statusMessage && (
+      {!connected && !status && (
         <View style={styles.statusContainer}>
           <ActivityIndicator />
-          <Text style={styles.statusText}>Connecting to Google Play...</Text>
+          <Text style={styles.statusText}>{strings.donation.connecting}</Text>
         </View>
       )}
 
       {/* Let the user try again when Google Play could not be reached. */}
-      {!connected && !!statusMessage && (
+      {!connected && !!status && (
         <TouchableOpacity
           style={styles.retryButton}
           onPress={handleRetryConnection}
           activeOpacity={0.7}
         >
-          <Text style={styles.retryText}>Try again</Text>
+          <Text style={styles.retryText}>{strings.donation.retry}</Text>
         </TouchableOpacity>
       )}
 
@@ -261,15 +257,15 @@ export default function DonationPanel({ visible = true, onClose }) {
       </View>
 
       {/* Explain that no donation is available if Google Play did not return the products. */}
-      {connected && products.length === 0 && !statusMessage && (
+      {connected && products.length === 0 && !status && (
         <Text style={styles.statusText}>
-          Donations are temporarily unavailable.
+          {strings.donation.empty}
         </Text>
       )}
 
       {/* Display billing, cancellation, connectivity, and purchase-status information. */}
-      {!!statusMessage && (
-        <Text style={styles.statusText}>{statusMessage}</Text>
+      {!!status && (
+        <Text style={styles.statusText}>{strings.donation[status]}</Text>
       )}
     </ModalShell>
   );

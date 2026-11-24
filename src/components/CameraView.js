@@ -80,7 +80,7 @@ export default function CameraView() {
   const [brightness, updateBrightness] = useSliderValue(0.5, Brightness.setBrightnessAsync);
 
   // The eye button and a double tap both remember the choice for the next launch.
-  const { settings, updateSetting } = useSettings();
+  const { settings, updateSetting, strings } = useSettings();
   const controlsVisible = settings.controlsVisible;
   const setControlsVisible = (visible) => updateSetting(STORAGE_KEYS.controlsVisible, visible);
 
@@ -180,13 +180,13 @@ export default function CameraView() {
   if (!hasPermission) {
     return (
       <MessageScreen
-        title="Camera permission needed"
-        message="Mirror Vue needs camera access to show your mirror. Allow access to continue."
+        title={strings.camera.permissionTitle}
+        message={strings.camera.permissionMessage}
         primaryLabel={
-          canRequestPermission ? "Allow camera access" : "Open settings"
+          canRequestPermission ? strings.camera.allowAccess : strings.camera.openSettings
         }
         onPrimaryPress={handleRequestPermission}
-        secondaryLabel={canRequestPermission ? "Open settings" : undefined}
+        secondaryLabel={canRequestPermission ? strings.camera.openSettings : undefined}
         onSecondaryPress={
           canRequestPermission ? () => Linking.openSettings() : undefined
         }
@@ -199,16 +199,16 @@ export default function CameraView() {
     return (
       <MessageScreen
         title={
-          cameraError.cameraInUse ? "Camera is in use" : "Camera unavailable"
+          cameraError.cameraInUse ? strings.camera.inUse : strings.camera.unavailable
         }
         message={
           isRetrying
-            ? "Retrying\u2026"
+            ? strings.camera.retrying
             : cameraError.cameraInUse
-              ? "Another app is using the camera. Close that app, then try again."
-              : "The camera could not start. Try again in a moment."
+              ? strings.camera.inUseMessage
+              : strings.camera.startFailed
         }
-        primaryLabel="Retry"
+        primaryLabel={strings.camera.retry}
         onPrimaryPress={handleRetry}
       />
     );
@@ -218,8 +218,8 @@ export default function CameraView() {
   if (!device) {
     return (
       <MessageScreen
-        title="Looking for camera"
-        message="The front camera is not available yet. Please wait a moment."
+        title={strings.camera.looking}
+        message={strings.camera.waiting}
       />
     );
   }

@@ -1,0 +1,56 @@
+{
+  "languageName": "Español",
+  "menu": {
+    "settings": "Ajustes",
+    "gestures": "Gestos",
+    "about": "Acerca de",
+    "donate": "Invítame a un café"
+  },
+  "settings": {
+    "language": "Idioma",
+    "allowLandscape": "Permitir el modo horizontal",
+    "landscapeDescription": "La pantalla de la aplicación gira cuando giras el dispositivo.",
+    "keepAwake": "Mantener la pantalla encendida",
+    "awakeDescription": "Evita que la pantalla se atenúe o se apague mientras usas MirrorVue."
+  },
+  "gestures": {
+    "doubleTap": "Toca dos veces el espejo para mostrar u ocultar los controles.",
+    "zoom": "Con la cámara en directo, separa dos dedos para ampliar la imagen. Acércalos para reducir el zoom.",
+    "brightness": "Con la cámara en directo, desliza dos dedos juntos hacia arriba para aumentar el brillo o hacia abajo para reducirlo."
+  },
+  "about": {
+    "version": "Versión",
+    "developer": "Desarrollador:",
+    "description": "MirrorVue usa la cámara frontal para convertir tu dispositivo Android en un espejo digital a pantalla completa.",
+    "privacy": "Privacidad: la imagen de la cámara se muestra en tu dispositivo. MirrorVue no envía ni transmite fotos ni vídeos."
+  },
+  "camera": {
+    "permissionTitle": "Se necesita acceso a la cámara",
+    "permissionMessage": "MirrorVue necesita usar la cámara para mostrar tu reflejo. Permite el acceso para continuar.",
+    "allowAccess": "Permitir acceso a la cámara",
+    "openSettings": "Abrir los ajustes",
+    "inUse": "Cámara en uso",
+    "unavailable": "Cámara no disponible",
+    "retrying": "Reintentando…",
+    "inUseMessage": "Otra aplicación está usando la cámara. Ciérrala y vuelve a intentarlo.",
+    "startFailed": "No se ha podido iniciar la cámara. Vuelve a intentarlo en unos instantes.",
+    "retry": "Reintentar",
+    "looking": "Buscando la cámara",
+    "waiting": "La cámara frontal aún no está disponible. Espera un momento."
+  },
+  "donation": {
+    "intro": "¡MirrorVue es gratis, sin anuncios y con todas las funciones disponibles para todos!",
+    "support": "Si la aplicación te resulta útil, puedes apoyar su desarrollo con una donación voluntaria.",
+    "connecting": "Conectando con Google Play…",
+    "retry": "Volver a intentar",
+    "empty": "Las donaciones no están disponibles temporalmente.",
+    "unavailable": "Las donaciones no están disponibles temporalmente. Vuelve a intentarlo más tarde.",
+    "pending": "Google Play aún está procesando tu donación.",
+    "unconfirmed": "No se ha podido confirmar la donación.",
+    "thanks": "¡Gracias por apoyar a MirrorVue!",
+    "unfinished": "La compra se ha completado, pero la confirmación final sigue pendiente.",
+    "failed": "No se ha podido completar la donación.",
+    "startFailed": "No se ha podido iniciar la donación.",
+    "networkError": "Comprueba tu conexión a internet y vuelve a intentarlo."
+  }
+}

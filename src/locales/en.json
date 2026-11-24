@@ -1,0 +1,56 @@
+{
+  "languageName": "English",
+  "menu": {
+    "settings": "Settings",
+    "gestures": "Gestures",
+    "about": "About",
+    "donate": "Buy me a coffee"
+  },
+  "settings": {
+    "language": "Language",
+    "allowLandscape": "Allow landscape mode",
+    "landscapeDescription": "Allow the interface to rotate when the device is turned.",
+    "keepAwake": "Keep screen awake",
+    "awakeDescription": "Prevent the screen from dimming or sleeping while MirrorVue is in the foreground."
+  },
+  "gestures": {
+    "doubleTap": "Double-tap the mirror to show or hide the controls.",
+    "zoom": "Spread two fingers apart on the live mirror to zoom in. Pinch them together to zoom out.",
+    "brightness": "Slide two fingers up together on the live mirror to brighten the screen, or down to dim it."
+  },
+  "about": {
+    "version": "Version",
+    "developer": "Developer:",
+    "description": "MirrorVue turns your Android device into a fullscreen digital mirror using the front-facing camera.",
+    "privacy": "Privacy: the camera preview is displayed locally. MirrorVue does not upload or transmit your image or video."
+  },
+  "camera": {
+    "permissionTitle": "Camera permission needed",
+    "permissionMessage": "MirrorVue needs camera access to show your mirror. Allow access to continue.",
+    "allowAccess": "Allow camera access",
+    "openSettings": "Open settings",
+    "inUse": "Camera is in use",
+    "unavailable": "Camera unavailable",
+    "retrying": "Retrying…",
+    "inUseMessage": "Another app is using the camera. Close that app, then try again.",
+    "startFailed": "The camera could not start. Try again in a moment.",
+    "retry": "Retry",
+    "looking": "Looking for camera",
+    "waiting": "The front camera is not available yet. Please wait a moment."
+  },
+  "donation": {
+    "intro": "MirrorVue is free, with no ads, and fully functional for everyone!",
+    "support": "If you find the app useful, you can support the development through a voluntary donation.",
+    "connecting": "Connecting to Google Play...",
+    "retry": "Try again",
+    "empty": "Donations are temporarily unavailable.",
+    "unavailable": "Donations are temporarily unavailable. Please try again later.",
+    "pending": "Your donation is still being processed by Google Play.",
+    "unconfirmed": "The donation could not be confirmed.",
+    "thanks": "Thank you for supporting MirrorVue!",
+    "unfinished": "The purchase was completed, but it could not be finalized yet.",
+    "failed": "The donation could not be completed.",
+    "startFailed": "Unable to start the donation.",
+    "networkError": "Check your internet connection and try again."
+  }
+}
