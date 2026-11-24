@@ -101,7 +101,8 @@ export function SettingsProvider({ children }) {
 
   return (
     <SettingsContext.Provider value={{ settings, updateSetting }}>
-      {children}
+      {/* Start the mirror with the saved controls already in the right state. */}
+      {isLoaded && children}
     </SettingsContext.Provider>
   );
 }

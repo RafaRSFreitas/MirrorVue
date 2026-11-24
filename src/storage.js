@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // so renaming one here updates every reader and writer at once.
 export const STORAGE_KEYS = {
   selectedLensId: 'selectedLensId',
+  controlsVisible: 'controlsVisible',
   keepScreenAwake: 'keepScreenAwake',
   allowLandscapeMode: 'allowLandscapeMode',
 };
@@ -11,6 +12,7 @@ export const STORAGE_KEYS = {
 // The value of each Settings option before the user has changed anything.
 // The names must match the ones in STORAGE_KEYS.
 export const DEFAULT_SETTINGS = {
+  controlsVisible: false,
   keepScreenAwake: true,
   allowLandscapeMode: false,
 };

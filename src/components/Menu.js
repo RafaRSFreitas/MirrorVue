@@ -9,6 +9,7 @@ import {
 import About from "./About";
 import DonationPanel from "./DonationPanel";
 import Settings from "./Settings";
+import ModalShell from "./ModalShell";
 import {
   CONTROL_BACKGROUND,
   CONTROL_SIZE,
@@ -29,6 +30,9 @@ export default function Menu() {
 
   // Track whether the Settings panel is currently being displayed.
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Track whether the gesture instructions are currently being displayed.
+  const [isGesturesOpen, setIsGesturesOpen] = useState(false);
 
   // Open or close the top-left menu.
   const toggleMenu = () => {
@@ -70,7 +74,7 @@ export default function Menu() {
 
   return (
     <>
-      {/* Open the top-left menu with Settings, About, and Buy me a coffee. */}
+      {/* Open the top-left menu. */}
       <TouchableOpacity style={[controlButtonStyle, styles.menuButton]} onPress={toggleMenu}>
         <Text style={styles.menuIcon}>☰</Text>
       </TouchableOpacity>
@@ -82,7 +86,7 @@ export default function Menu() {
         <Pressable style={styles.menuOverlay} onPress={toggleMenu} />
       )}
 
-      {/* Show the three menu items when the hamburger button has been opened. */}
+      {/* Show the menu items when the hamburger button has been opened. */}
       {isMenuOpen && (
         <View
           style={styles.menuDropdown}
@@ -91,6 +95,14 @@ export default function Menu() {
           {/* Open the Settings panel. */}
           <TouchableOpacity style={styles.menuItem} onPress={openSettings}>
             <Text style={styles.menuItemText}>Settings</Text>
+          </TouchableOpacity>
+
+          {/* Open the gesture instructions and close the dropdown. */}
+          <TouchableOpacity style={styles.menuItem} onPress={() => {
+            setIsMenuOpen(false);
+            setIsGesturesOpen(true);
+          }}>
+            <Text style={styles.menuItemText}>Gestures</Text>
           </TouchableOpacity>
 
           {/* Open the About information without leaving the mirror preview. */}
@@ -110,6 +122,13 @@ export default function Menu() {
 
       {/* Display the Settings panel and its functional preferences. */}
       <Settings visible={isSettingsOpen} onClose={closeSettings} />
+
+      {/* Explain the mirror gestures in the same panel used for the other menu options. */}
+      <ModalShell visible={isGesturesOpen} title="Gestures" onClose={() => setIsGesturesOpen(false)}>
+        <Text style={styles.instruction}>Double-tap the mirror to show or hide the controls.</Text>
+        <Text style={styles.instruction}>Spread two fingers apart on the live mirror to zoom in. Pinch them together to zoom out.</Text>
+        <Text style={styles.instruction}>Slide two fingers up together on the live mirror to brighten the screen, or down to dim it.</Text>
+      </ModalShell>
 
       {/* Display the DonationPanel when the user chooses Buy me a coffee. */}
       {isDonationOpen && <DonationPanel onClose={closeDonation} />}
@@ -166,5 +185,12 @@ const styles = StyleSheet.create({
   menuItemText: {
     color: "white",
     fontSize: 18,
+  },
+
+  instruction: {
+    color: "white",
+    fontSize: 16,
+    lineHeight: 23,
+    marginBottom: 12,
   },
 });

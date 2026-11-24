@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, LogBox, AppState, BackHandler, Linking } from "react-native";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import { GestureDetector } from "react-native-gesture-handler";
+import * as Brightness from "expo-brightness";
 import {
   Camera,
   useCameraPermission,
@@ -16,7 +17,10 @@ import EyeButton from "./EyeButton";
 import FlashButton from "./FlashButton";
 import MessageScreen from "./MessageScreen";
 import { STORAGE_KEYS, loadSetting, saveSetting } from '../storage';
-import { FLASH_MIN_WIDTH, ZOOM_RESTORE_DELAY_MS } from '../constants';
+import { FLASH_MIN_WIDTH, MAX_ZOOM, ZOOM_RESTORE_DELAY_MS } from '../constants';
+import { useSettings } from '../SettingsContext';
+import { useSliderValue } from '../hooks/useSliderValue';
+import useMirrorGestures from '../hooks/useMirrorGestures';
 import useFrozenFrame from '../hooks/useFrozenFrame';
 import useCameraErrors from '../hooks/useCameraErrors';
 
@@ -69,19 +73,16 @@ export default function CameraView() {
   // Store the zoom value in React state so the Camera re-renders when it changes.
   const [cameraZoom, setCameraZoom] = useState(null);
 
-  // Changing this value tells ZoomSlider to return to its initial position
-  const [zoomResetKey, setZoomResetKey] = useState(0);
+  // The sliders and the mirror gestures share the same values and lens limits.
+  const minZoom = device?.minZoom ?? 1;
+  const maxZoom = Math.min(device?.maxZoom ?? MAX_ZOOM, MAX_ZOOM);
+  const [zoom, updateZoom] = useSliderValue(minZoom, setCameraZoom);
+  const [brightness, updateBrightness] = useSliderValue(0.5, Brightness.setBrightnessAsync);
 
-  // Remember the most recently applied zoom level, so it can be restored after the camera pauses.
-  const lastZoomRef = useRef(null);
-
-  // Track whether the controls are currently visible.
-  const [controlsVisible, setControlsVisible] = useState(false);
-
-  // A double tap on the mirror shows or hides the controls, like the eye button.
-  const doubleTap = Gesture.Tap().numberOfTaps(2).runOnJS(true).onEnd(() => {
-    setControlsVisible((currentValue) => !currentValue);
-  });
+  // The eye button and a double tap both remember the choice for the next launch.
+  const { settings, updateSetting } = useSettings();
+  const controlsVisible = settings.controlsVisible;
+  const setControlsVisible = (visible) => updateSetting(STORAGE_KEYS.controlsVisible, visible);
 
   // Return to the live preview when Back is pressed while the image is frozen.
   useEffect(() => {
@@ -102,6 +103,18 @@ export default function CameraView() {
   const [containerHeight, setContainerHeight] = useState(null);
   const showBrightnessSlider =
     containerHeight === null || containerHeight >= BRIGHTNESS_MIN_HEIGHT;
+
+  const { gesture, activeSlider } = useMirrorGestures({
+    enabled: cameraActive && !!device && containerHeight > 0,
+    height: containerHeight,
+    minZoom,
+    maxZoom,
+    zoom,
+    updateZoom,
+    brightness,
+    updateBrightness,
+    onDoubleTap: () => setControlsVisible(!controlsVisible),
+  });
 
   // Shrink the zoom slider's track (then its right offset) when the container is too
   // narrow to fit the full control, instead of hiding it.
@@ -142,23 +155,15 @@ export default function CameraView() {
     return () => subscription.remove();
   }, []);
 
-  // Keep lastZoomRef up to date every time the zoom level actually changes.
-  useEffect(() => {
-    if (cameraZoom !== null) {
-      lastZoomRef.current = cameraZoom;
-    }
-  }, [cameraZoom]);
-
   // Effect to restore zoom whenever the camera becomes active again — whether from
   // unfreezing, or from the app returning to the foreground.
   useEffect(() => {
-    if (cameraActive && lastZoomRef.current !== null) {
-      const zoomToRestore = lastZoomRef.current;
+    if (cameraActive && device) {
       // Temporarily set zoom to null. This changes the prop and forces the Camera
       // to reapply the zoom when we set it back shortly after.
       setCameraZoom(null);
       const timer = setTimeout(() => {
-        setCameraZoom(zoomToRestore);
+        setCameraZoom(zoom.value);
       }, ZOOM_RESTORE_DELAY_MS); // Let the camera finish re-initialising first.
       return () => clearTimeout(timer);
     }
@@ -166,17 +171,10 @@ export default function CameraView() {
 
   // When the lens changes, zoom resets since each lens has its own range.
   useEffect(() => {
-    if (selectedLensId === null || !device) return;
-
-    // Forget the previous lens's zoom.
-    lastZoomRef.current = null;
-
-    // Start the new lens at its minimum supported zoom.
-    setCameraZoom(device.minZoom ?? 1);
-
-    // Reset the visual zoom slider to its starting position.
-    setZoomResetKey((currentKey) => currentKey + 1);
-  }, [selectedLensId]);
+    if (!device) return;
+    zoom.value = minZoom;
+    setCameraZoom(minZoom);
+  }, [device?.id]);
 
   // Explain why permission is needed and offer the appropriate next steps.
   if (!hasPermission) {
@@ -252,8 +250,8 @@ export default function CameraView() {
       {/* Show the captured frame on top of the camera while frozen. */}
       {frozenUri !== null && <FrozenFrame uri={frozenUri} />}
 
-      {/* Listen for double taps on the image without covering the controls. */}
-      <GestureDetector gesture={doubleTap}>
+      {/* Listen for gestures on the mirror without covering the controls. */}
+      <GestureDetector gesture={gesture}>
         <View style={StyleSheet.absoluteFill} pointerEvents="box-only" />
       </GestureDetector>
 
@@ -269,13 +267,15 @@ export default function CameraView() {
       {/* Display the top-left menu and its navigation options. */}
       {controlsVisible && <Menu />}
 
-      {/* Update cameraZoom whenever the user moves the zoom slider. */}
-      {controlsVisible && !isFrozen && (
+      {/* Keep the zoom slider ready to appear during a pinch. */}
+      {!isFrozen && (
         <ZoomSlider
-          device={device}
-          onZoomChange={(newZoom) => setCameraZoom(newZoom)}
-          resetKey={zoomResetKey}
-          initialZoom={cameraZoom ?? device.minZoom ?? 1}
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+          zoom={zoom}
+          updateZoom={updateZoom}
+          controlsVisible={controlsVisible}
+          activeSlider={activeSlider}
           trackWidth={zoomLayout.trackWidth}
           rightOffset={zoomLayout.rightOffset}
         />
@@ -285,8 +285,15 @@ export default function CameraView() {
       <FreezeButton isFrozen={isFrozen} controlsVisible={controlsVisible} onPress={toggleFreeze} />
 
       {/* Let the user adjust the screen brightness while the app is open. */}
-      {controlsVisible && !isFrozen && showBrightnessSlider && (
-        <BrightnessSlider flashOn={isFlashOn} />
+      {!isFrozen && (
+        <BrightnessSlider
+          flashOn={isFlashOn}
+          brightness={brightness}
+          updateBrightness={updateBrightness}
+          controlsVisible={controlsVisible && showBrightnessSlider}
+          compactHeight={showBrightnessSlider ? null : containerHeight}
+          activeSlider={activeSlider}
+        />
       )}
 
       {/* Only show the lens toggle when the phone actually has more than one front camera,
